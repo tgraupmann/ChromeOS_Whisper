@@ -11,6 +11,13 @@ Process:
 
 * Setup Linux Subsystem with 12GB of space. - https://support.google.com/chromebook/answer/9145439
 
+* Install dependencies:
+
+```
+sudo apt install curl
+sudo apt-get install ffmpeg
+```
+
 * Install Anaconda - https://chromeready.com/5218/install-update-anaconda-chromebook/
 
 * Install Anaconda through the `penguin` terminal so it shares the environment with VS Code.
