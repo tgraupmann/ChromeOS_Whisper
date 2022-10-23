@@ -13,7 +13,7 @@ Testing:
 
 * English language works.
 
-* Chinese language transcribed `Hello`.
+* Chinese language transcribed `你好` (Hello).
 
 Process:
 
