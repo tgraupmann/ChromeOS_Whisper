@@ -3,7 +3,17 @@ Run Whisper AI Model on ChromeOS
 
 Change Log:
 
+```
 Initial commit of project
+```
+
+Testing:
+
+* Using a Samsung ChromeBook 4, transcribing an English sentence from MP3 takes around 30 seconds.
+
+* English language works.
+
+* Chinese language transcribed `Hello`.
 
 Process:
 
