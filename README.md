@@ -19,6 +19,7 @@ Process:
 mkdir ~/tmp && cd ~/tmp
 curl -O https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
 chmod +x ./Anaconda3-2022.10-Linux-x86_64.sh
+./Anaconda3-2022.10-Linux-x86_64.sh
 ```
 
 * Clean up the temp folder after install is complete.
