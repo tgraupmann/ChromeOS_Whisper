@@ -39,6 +39,10 @@ sudo ln -s ~/anaconda3/bin/pip /usr/bin/pip
 
 * Install Visual Studio Code - https://chromeunboxed.com/how-to-install-visual-studio-code-on-a-chromebook/
 
+* Check out this repository to a place that Linux has access to like ~/Downloads/Whisper - https://www.techrepublic.com/article/how-to-share-files-with-linux-apps-on-chrome-os/
+
+* Share the Downloads/Whisper folder with the Linux environment.
+
 * Open the [Whisper Notebook](Whisper.ipynb) in VS Code
 
 * Record new audio clips with a microphone recorder tool like `Voice Recorder` which saves `WAV` and `MP3` files. (MP3 runs faster with Whisper). Recordings save to `Play Files\Recorders`.
