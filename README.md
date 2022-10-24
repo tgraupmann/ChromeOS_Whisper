@@ -90,6 +90,15 @@ sudo ln -s ~/anaconda3/bin/conda /usr/bin/conda
 
 ## WSL2 (Work in progress)
 
+* Get the code and open `VS Code`
+
+```
+mkdir ~/Public
+cd ~/Public
+git clone https://github.com/tgraupmann/ChromeOS_Whisper
+cd ChromeOS_Whisper
+```
+
 * Install dependencies to run `jupyter` server.
 
 ```
