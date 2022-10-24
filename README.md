@@ -88,7 +88,11 @@ sudo ln -s ~/anaconda3/bin/conda /usr/bin/conda
 
 * Record new audio clips with a microphone recorder tool like `Voice Recorder` which saves `WAV` and `MP3` files. (MP3 runs faster with Whisper). Recordings save to `Play Files\Recorders`.
 
-## WSL2 (Work in progress)
+## WSL2 on Windows
+
+* Install WSL2 with Ubuntu 22.04 on Windows - https://apps.microsoft.com/store/detail/ubuntu/9PDXGNCFSCZV
+
+* Follow the steps from above and run in the Ubuntu terminal. You should install the dependencies including Anaconda with the same code above in the Ubuntu terminal.
 
 * Get the code and open `VS Code`
 
