@@ -105,6 +105,7 @@ mkdir ~/Public
 cd ~/Public
 git clone https://github.com/tgraupmann/ChromeOS_Whisper
 cd ChromeOS_Whisper
+code .
 ```
 
 * Install dependencies to run `jupyter` server.
