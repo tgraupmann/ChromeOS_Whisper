@@ -138,3 +138,28 @@ jupyter lab
 * After connecting to the `jupyter server` select the `Whisper.ipynb` notebook and then `VS Code` can run the notebook cells.
 
 * If you use the browser interface, use the `jupyter lab` to open the `Whisper.ipynb` notebook which should change the URL to something like - http://localhost:8888/lab/tree/Whisper.ipynb
+
+* In my case I needed to upgrade the CUDA support in PyTorch.
+
+```
+conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
+```
+
+* Installing CUDA 11.3 support includes `sm_86` which is needed for `NVIDIA GeForce RTX 3070`.
+
+```
+python PrintCudaSupport.py
+archList:  ['sm_37', 'sm_50', 'sm_60', 'sm_61', 'sm_70', 'sm_75', 'sm_80', 'sm_86', 'compute_37']
+```
+
+* `Notebook Whisper.ipynb is not trusted` okay...
+
+```
+jupyter trust Whisper.ipynb
+```
+
+* And restart the lab.
+
+```
+jupyter lab
+```
