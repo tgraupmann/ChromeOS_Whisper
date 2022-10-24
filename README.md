@@ -113,6 +113,7 @@ pip3 install jupyterlab
 pip3 install markupsafe==2.0.1
 pip3 install traitlets==5.1.1
 pip3 install pygments==2.4.1
+sudo apt-get install jupyter-core
 ```
 
 * Start the `jupyter` server in the `WSL2` terminal. Starting the lab logs an authorization url that can be used in the browser or `VS Code`.
