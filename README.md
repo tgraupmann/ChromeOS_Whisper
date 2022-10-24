@@ -96,6 +96,8 @@ sudo ln -s ~/anaconda3/bin/jupyter /usr/bin/jupyter
 
 * Install WSL2 with Ubuntu 22.04 on Windows - https://apps.microsoft.com/store/detail/ubuntu/9PDXGNCFSCZV
 
+* Note: You can find the WSL2 directory on Windows in `\\wsl$\Ubuntu-20.04\home`.
+
 * Follow the steps from above and run in the Ubuntu terminal. You should install the dependencies including Anaconda with the same code above in the Ubuntu terminal.
 
 * Get the code and open `VS Code`
