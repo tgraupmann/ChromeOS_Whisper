@@ -25,6 +25,8 @@ model = whisper.load_model("base")
 
 * Chinese language transcribed `你好` (Hello).
 
+* Running `whisper` with `WSL2` on `Windows` transcribes a sentence in `0.3 seconds`.
+
 Process:
 
 * Setup Chromebook in developer mode (this wipes all data) - https://chromeready.com/1186/how-to-enable-developer-mode-on-a-chromebook/
