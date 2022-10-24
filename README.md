@@ -85,3 +85,29 @@ sudo ln -s ~/anaconda3/bin/conda /usr/bin/conda
 ![image_2](images/image_2.png)
 
 * Record new audio clips with a microphone recorder tool like `Voice Recorder` which saves `WAV` and `MP3` files. (MP3 runs faster with Whisper). Recordings save to `Play Files\Recorders`.
+
+## WSL2 (Work in progress)
+
+* Install dependencies to run `jupyter` server.
+
+```
+pip3 install jupyter
+pip3 install jupyterlab
+pip3 install markupsafe==2.0.1
+pip3 install traitlets==5.1.1
+pip3 install pygments==2.4.1
+```
+
+* Start the `jupyter` server in the `WSL2` terminal. Starting the lab logs an authorization url that can be used in the browser or `VS Code`.
+
+```
+jupyter lab
+```
+
+* The same link can be entered into `VS Code` to connect to the `jupyter server`.
+
+![image_3](images/image_3.png)
+
+* After connecting to the `jupyter server` select the `Whisper.ipynb` notebook and then `VS Code` can run the notebook cells.
+
+* If you use the browser interface, use the `jupyter lab` to open the `Whisper.ipynb` notebook which should change the URL to something like - http://localhost:8888/lab/tree/Whisper.ipynb
