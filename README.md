@@ -1,5 +1,5 @@
 # ChromeOS_Whisper
-Run Whisper AI Model on ChromeOS
+Run Whisper AI Model on ChromeOS and on Windows WSL2
 
 ## Intro
 
