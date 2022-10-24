@@ -15,6 +15,12 @@ Testing:
 
 * Using a Samsung ChromeBook 4, transcribing an English sentence from MP3 takes around 30 seconds.
 
+* Use the `base` model on CB4 to avoid running out of memory when loading the model.
+
+```
+model = whisper.load_model("base")
+```
+
 * English language works.
 
 * Chinese language transcribed `你好` (Hello).
