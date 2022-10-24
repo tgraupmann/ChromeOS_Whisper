@@ -66,10 +66,12 @@ sudo rm /usr/bin/python
 sudo rm /usr/bin/pip
 sudo rm /usr/bin/pip3
 sudo rm /usr/bin/conda
+sudo rm /usr/bin/jupiter
 sudo ln -s ~/anaconda3/bin/python /usr/bin/python
 sudo ln -s ~/anaconda3/bin/pip /usr/bin/pip
 sudo ln -s ~/anaconda3/bin/pip3 /usr/bin/pip3
 sudo ln -s ~/anaconda3/bin/conda /usr/bin/conda
+sudo ln -s ~/anaconda3/bin/conda /usr/bin/jupiter
 ```
 
 * Install [Visual Studio Code](https://code.visualstudio.com/download) - https://chromeunboxed.com/how-to-install-visual-studio-code-on-a-chromebook/
