@@ -74,8 +74,12 @@ sudo ln -s ~/anaconda3/bin/pip /usr/bin/pip
 
 * Open the [Whisper Notebook](Whisper.ipynb) in VS Code
 
-* Running the first cell in the notebook might prompt to install extensions for `Python + Jupiter`. Accept installing the extensions and restart `VS-Code` after the install completes. This allows you to execute the code snippets in the notebook directly from `VS Code`.
+* Running the first cell in the notebook might prompt to install extensions for `Python + Jupiter`. Accept installing the extensions and restart `VS-Code` after the extension installation completes. This allows you to execute the code snippets in the notebook directly from `VS Code`.
 
 ![image_1](images/image_1.png)
+
+* Running a notebook cell might prompt to `Connect to a Jupyter Server`.
+
+![image_2](images/image_2.png)
 
 * Record new audio clips with a microphone recorder tool like `Voice Recorder` which saves `WAV` and `MP3` files. (MP3 runs faster with Whisper). Recordings save to `Play Files\Recorders`.
