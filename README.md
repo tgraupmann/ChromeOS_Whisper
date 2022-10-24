@@ -110,6 +110,10 @@ cd ChromeOS_Whisper
 code .
 ```
 
+* Install the `jupyter` extension. You may have to use the extension browser and select `Install in WSL: Ubuntu: 20.X`.
+
+![image_4](images/image_4.png)
+
 * Install dependencies to run `jupyter` server.
 
 ```
