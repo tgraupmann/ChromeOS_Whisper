@@ -166,7 +166,7 @@ jupyter lab
 
 ## Translation
 
-* Chinese text translates the following to test how well the translation performs. This is the script.
+* `Test_Chinese.mp3` is an audio translation of the following English text to see how well the model translates from Mandarin to English. This is the original script.
 
 <p>
 OK, here we go. I'm going to read the script you gave me by using Mandarin Chinese. Okay go over to the title bar window, select the blue color. What time zone are you in? Are you on Windows? Are you familiar with the application? How many games do you have on steam? From the color picker select the color value. Use the hex code with a hash.
