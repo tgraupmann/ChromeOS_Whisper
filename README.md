@@ -53,6 +53,7 @@ chmod +x ./Anaconda3-2022.10-Linux-x86_64.sh
 * Clean up the temp folder after install is complete.
 
 ```
+cd ~
 rm -r -f ~/tmp
 ```
 
