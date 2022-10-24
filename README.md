@@ -64,7 +64,7 @@ sudo ln -s ~/anaconda3/bin/python /usr/bin/python
 sudo ln -s ~/anaconda3/bin/pip /usr/bin/pip
 ```
 
-* Install Visual Studio Code - https://chromeunboxed.com/how-to-install-visual-studio-code-on-a-chromebook/
+* Install [Visual Studio Code](https://code.visualstudio.com/download) - https://chromeunboxed.com/how-to-install-visual-studio-code-on-a-chromebook/
 
 * Check out this repository to a place that Linux has access to like ~/Downloads/Whisper - https://www.techrepublic.com/article/how-to-share-files-with-linux-apps-on-chrome-os/
 
