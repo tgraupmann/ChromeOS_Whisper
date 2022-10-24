@@ -163,3 +163,41 @@ jupyter trust Whisper.ipynb
 ```
 jupyter lab
 ```
+
+## Translation
+
+* Chinese text translates the following to test how well the translation performs. This is the script.
+
+```
+OK, here we go. I'm going to read the script you gave me by using Mandarin Chinese. Okay go over to the title bar window, select the blue color. What time zone are you in? Are you on Windows? Are you familiar with the application? How many games do you have on steam? From the color picker select the color value. Use the hex code with a hash.
+```
+
+* Results with the `tiny` model.
+
+```
+Okay, here we go. I'm gonna read the script you gave me by using Manoring Chinese. Okay, we're now going to Windows, Zhuang Thai, Lan, Xuan Ze Lan. What are you doing in the studio? You're using Windows, do you want to do a new thing? You're using the same software. When in Steam what you get, you have some information. From for virtual machines to forc it's here withience. It's my package to choose your private choice.
+```
+
+* Results with the `base` model.
+
+```
+Okay, here we go. I'm gonna read the script you gave me by using Mandarin Chinese. Okay, now we're going to Wendels, the blue one. What are you actually doing? Are you using Wendels? You are using this to use the熟悉? How many games do you have on Steam? Since pargnol colored, select d for this from him.
+```
+
+* Results with the `small` model.
+
+```
+ OK, here we go. I'm going to read the script you gave me by using Manning Chinese. OK, now we go to Windows, select blue. What is your current time zone? Are you using Windows operating system? Are you familiar with this application process? How many games do you have on Steam? Select the color system from the color value. We enable since and add ser directory up.
+ ```
+
+* Results with the `medium` model.
+
+```
+Ok, here we go. I'm gonna read the script you gave me by using Mandarin Chinese. Ok, let's go to Windows, and select blue. What is your location? Are you using Windows operating system? Are you familiar with this app? How many games do you have on Steam? Select the color value from the color selector, use the hex code and add the warning key.
+```
+
+* Results with the `large` model.
+
+```
+This model required too much GPU RAM for my PC to run.
+```
