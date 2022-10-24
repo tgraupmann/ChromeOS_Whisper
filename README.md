@@ -1,6 +1,10 @@
 # ChromeOS_Whisper
 Run Whisper AI Model on ChromeOS
 
+## Intro
+
+[Whisper](https://github.com/openai/whisper) is an awesome AI model that does speech detection and transcription for multiple languages.
+
 Change Log:
 
 ```
