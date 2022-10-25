@@ -102,9 +102,10 @@ sudo ln -s ~/anaconda3/bin/jupyter /usr/bin/jupyter
 
 * Get the code and open `VS Code`
 
+* In order to have the permission to write to the `Downloads` folder from Linux the folder needs to be `Shared with Linux`. After sharing, close and reopen the shell for the write permissions to take effect.
+
 ```
-mkdir ~/Public
-cd ~/Public
+cd /mnt/chromeos/MyFiles/Downloads/
 git clone https://github.com/tgraupmann/ChromeOS_Whisper
 cd ChromeOS_Whisper
 code .
