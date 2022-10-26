@@ -7,8 +7,11 @@
 <body>
   <div style="display: flex; flex-direction: column;">
     <div>Show Translations Here:</div>
-    <textarea cols="80" rows="20"></textarea>
+    <textarea id="txtResult" cols="80" rows="20"></textarea>
+    <div id="NumberOfMicrophones"></div>
+    <div id="Microphones"></div>
   </div>
+  <canvas id="canvasRender" width="256" height="256" style="background: black"></canvas>
 </body>
 
 <script>
@@ -24,12 +27,219 @@
     req.send(JSON.stringify(data));
   }
 
+  /*
   translate({
     data: [1, 2, 3, 4.567],
     sampleRate: 44100
   }, function (text) {
     console.log('translate result:', text);
   });
+  */
+
+
+  var MicrophonePlugin = {
+
+
+    buffer: undefined,
+
+    mMicrophones: [],
+
+    Init: function () {
+
+      //console.log("Init:");
+
+      const SAMPLE_RATE = 16000;
+
+      var byteOffset = 0;
+      var length = SAMPLE_RATE;
+      this.buffer = new ArrayBuffer(4 * length);
+      document.dataArray = new Float32Array(this.buffer, byteOffset, length);
+
+      var constraints = {
+        audio: true
+      };
+
+      navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia;
+
+      if (navigator.getUserMedia) {
+
+        navigator.getUserMedia(constraints, function (stream) {
+          //console.log('navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
+
+          document.position = 0;
+
+          document.audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
+          console.log('sampleRate', document.audioContext.sampleRate);
+          document.tempSize = SAMPLE_RATE;
+          document.tempArray = new Float32Array(document.tempSize)
+          document.analyser = document.audioContext.createAnalyser();
+          document.analyser.minDecibels = -90;
+          document.analyser.maxDecibels = -10;
+          document.analyser.smoothingTimeConstant = 0.85;
+
+          document.mediaRecorder = new MediaRecorder(stream);
+
+          document.source = document.audioContext.createMediaStreamSource(stream);
+
+          document.source.connect(document.analyser);
+
+          document.mediaRecorder.start();
+          //console.log('Microphone Status: ', document.mediaRecorder.state);
+
+          document.readDataOnInterval = function () {
+
+            if (document.dataArray == undefined) {
+              setTimeout(document.readDataOnInterval, 1000); //wait to be set
+              return;
+            }
+
+            // read the next chunk after interval
+            setTimeout(document.readDataOnInterval, 1000);
+
+            if (document.dataArray == undefined) {
+              return;
+            }
+
+            //read the temp data buffer
+            document.analyser.getFloatTimeDomainData(document.tempArray);
+
+            // use the amplitude to get volume
+            let volume = 0;
+
+            let rawWave = [];
+
+            let j = (document.position + document.dataArray.length - document.tempSize) % document.dataArray.length;
+            for (var i = 0; i < document.tempSize; ++i) {
+              volume = Math.max(volume, Math.abs(document.tempArray[i]));
+              document.dataArray[j] = document.tempArray[i];
+              j = (j + 1) % document.dataArray.length;
+              rawWave.push(document.dataArray[j]);
+            }
+            document.position = (document.position + document.tempSize) % document.dataArray.length;
+
+            let ctx = canvasRender.getContext("2d");
+
+            ctx.fillStyle = "rgb(200, 200, 200)";
+            ctx.fillRect(0, 0, canvasRender.width, canvasRender.height);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgb(0, 0, 0)";
+            ctx.beginPath();
+
+            const sliceWidth = (canvasRender.width * 1.0) / SAMPLE_RATE;
+            let x = 0;
+
+            for (let i = 0; i < SAMPLE_RATE; i++) {
+              const v = rawWave[i] * 200.0;
+              const y = canvasRender.height / 2 + v;
+
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+              x += sliceWidth;
+            }
+
+            ctx.lineTo(canvasRender.width, canvasRender.height / 2);
+            ctx.stroke();
+
+            console.log(new Date(), 'Data read.', 'volume', volume, 'length', rawWave.length, 'data', rawWave.splice(0, 25));
+
+            console.log(new Date(), 'sampleRate', document.audioContext.sampleRate);
+
+            translate({
+              data: rawWave,
+              sampleRate: document.audioContext.sampleRate
+            }, function (text) {
+              let json = JSON.parse(text);
+              //console.log('translate result:', json.text);
+              if (json.text) {
+                txtResult.value = json.text;
+              }
+            });
+          };
+
+          document.readDataOnInterval();
+        }, function (error) {
+          console.error('navigator.getUserMedia errorCallback: ', error);
+        });
+      }
+    },
+
+    hasGetUserMedia: function () {
+      return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia || navigator.msGetUserMedia);
+    },
+
+    AddMicrophone: function (device) {
+      this.mMicrophones.push(device);
+    },
+
+    QueryAudioInput: function (callback) {
+
+      var refThis = this;
+
+      // clear
+      this.mMicrophones = [];
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        console.log("enumerateDevices() not supported.");
+      } else {
+        // List microphones - async
+        navigator.mediaDevices.enumerateDevices()
+          .then(function (devices) {
+            devices.forEach(function (device) {
+              //console.log("QueryAudioInput: kind="+device.kind + " device=", device, " id=" + device.deviceId);
+              if (device.kind === 'audioinput') {
+                //console.log("QueryAudioInput: kind=audioinput device=", device, " id=" + device.deviceId);
+                refThis.AddMicrophone(device);
+              }
+            });
+            callback();
+          })
+          .catch(function (err) {
+            console.error('Error', err.name + ": " + err.message);
+          });
+      }
+    },
+
+    GetNumberOfMicrophones: function () {
+      //console.log("GetNumberOfMicrophones length", this.mMicrophones.length);
+      return this.mMicrophones.length;
+    },
+
+    GetMicrophoneDeviceName: function (index) {
+      return this.mMicrophones[index].label;
+    }
+  };
+
+  MicrophonePlugin.Init();
+
+  setInterval(function () {
+
+    MicrophonePlugin.QueryAudioInput(function () {
+      //console.log('Getting number of mics...');
+      let numberOfMicrophones = MicrophonePlugin.GetNumberOfMicrophones();
+      //console.log('Number of Microphones...', numberOfMicrophones);
+      let divNumberOfMicrophones = document.getElementById('NumberOfMicrophones');
+      if (divNumberOfMicrophones != undefined) {
+        divNumberOfMicrophones.innerText = "Number of Microphones: " + numberOfMicrophones;
+      }
+
+      let divMicrophones = document.getElementById('Microphones');
+      if (divMicrophones != undefined) {
+        let text = '';
+        for (let i = 0; i < numberOfMicrophones; ++i) {
+          let name = MicrophonePlugin.GetMicrophoneDeviceName(i);
+          text += '* ' + name + "\r\n";
+        }
+        divMicrophones.innerText = text;
+      }
+    });
+
+  }, 1000);
 
 </script>
 

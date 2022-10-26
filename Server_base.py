@@ -70,23 +70,29 @@ def load_audio(file: str, sr: int = SAMPLE_RATE):
 
 @app.post('/translate')
 async def api_translate(item:TranslateItem):
-  print("Transcription: Start...")
+
+  print("SAMPLE_RATE", SAMPLE_RATE, "sampleRate", item.sampleRate, "data", len(item.data))
+
+  #print("Transcription: Start...")
   #results = model.transcribe("Test_MP3.mp3", language="en")
   #audio = whisper.load_audio("Test_WAV.wav")
-  #audio = load_audio("Test_WAV.wav")
+  #audio = load_audio("Test_1Sec.wav")
   #print ("ffmpeg length", len(audio), "max", max(abs(audio)))
   #print ("ffmpeg audio", audio)
-  from scipy.io import wavfile
-  rateWave,rawWave = wavfile.read("Test_WAV.wav")
-  print("rateWave", rateWave, "rawWave", rawWave)
+  #from scipy.io import wavfile
+  #rateWave,rawWave = wavfile.read("Test_WAV.wav")
+  #print("rateWave", rateWave, "rawWave", rawWave)
+  rawWave = item.data
+  #print("sampleRate", item.sampleRate, "rawWave", rawWave)
   #print("Wave length", len(rawWave))
   #print("Wave audio", rawWave)
 
   # Resample data
   number_of_samples = round(len(rawWave) * float(SAMPLE_RATE) / float(item.sampleRate))
   resampledWave = sps.resample(rawWave, number_of_samples)
-  audio = np.array(resampledWave).astype(np.float32) / 32768.0
-  #print("Resampled length", len(audio), "max", max(abs(audio)))
+  #audio = np.array(resampledWave).astype(np.float32) / 32768.0
+  audio = np.array(resampledWave).astype(np.float32)
+  print("Resampled length", len(audio), "max", max(abs(audio)))
   #print("Resampled audio", audio)
 
   audio = whisper.pad_or_trim(audio)
