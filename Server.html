@@ -24,7 +24,10 @@
     req.send(JSON.stringify(data));
   }
 
-  translate({ data: [1, 2, 3, 4.567] }, function (text) {
+  translate({
+    data: [1, 2, 3, 4.567],
+    sampleRate: 44100
+  }, function (text) {
     console.log('translate result:', text);
   });
 

@@ -11,6 +11,9 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List
+import numpy as np
+import ffmpeg
+import scipy.signal as sps
 import whisper
 
 print("Loading Whisper Model...")
@@ -31,15 +34,64 @@ app = FastAPI()
 
 class TranslateItem(BaseModel):
   data: List[float]
+  sampleRate: int
+
+# hard-coded audio hyperparameters
+SAMPLE_RATE = 16000
+
+def load_audio(file: str, sr: int = SAMPLE_RATE):
+  """
+  Open an audio file and read as mono waveform, resampling as necessary
+
+  Parameters
+  ----------
+  file: str
+      The audio file to open
+
+  sr: int
+      The sample rate to resample the audio if necessary
+
+  Returns
+  -------
+  A NumPy array containing the audio waveform, in float32 dtype.
+  """
+  try:
+      # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
+      # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
+      out, _ = (
+          ffmpeg.input(file, threads=0)
+          .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
+          .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+      )
+  except ffmpeg.Error as e:
+      raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+  return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
 
 @app.post('/translate')
 async def api_translate(item:TranslateItem):
   print("Transcription: Start...")
-  results = model.transcribe("Test_MP3.mp3", language="en")
-  #results = model.transcribe([1,2,3], language="en")
-  waveData = item.data;
-  #print("waveData", waveData)
-  #results = model.transcribe(waveData, language="en")
+  #results = model.transcribe("Test_MP3.mp3", language="en")
+  #audio = whisper.load_audio("Test_WAV.wav")
+  #audio = load_audio("Test_WAV.wav")
+  #print ("ffmpeg length", len(audio), "max", max(abs(audio)))
+  #print ("ffmpeg audio", audio)
+  from scipy.io import wavfile
+  rateWave,rawWave = wavfile.read("Test_WAV.wav")
+  print("rateWave", rateWave, "rawWave", rawWave)
+  #print("Wave length", len(rawWave))
+  #print("Wave audio", rawWave)
+
+  # Resample data
+  number_of_samples = round(len(rawWave) * float(SAMPLE_RATE) / float(item.sampleRate))
+  resampledWave = sps.resample(rawWave, number_of_samples)
+  audio = np.array(resampledWave).astype(np.float32) / 32768.0
+  #print("Resampled length", len(audio), "max", max(abs(audio)))
+  #print("Resampled audio", audio)
+
+  audio = whisper.pad_or_trim(audio)
+  results = model.transcribe(audio, language="en")
+
   print("Transcription: Done!")
   return {"text":results["text"]}
 
