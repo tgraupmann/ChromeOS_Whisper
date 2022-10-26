@@ -19,11 +19,12 @@
       //console.log("response:", this.responseText);
       callback(this.responseText);
     });
-    req.open("GET", window.location.href + "api");
-    req.send();
+    req.open("POST", window.location.href + "translate");
+    req.setRequestHeader("Content-Type", "application/json");
+    req.send(JSON.stringify(data));
   }
 
-  translate([], function (text) {
+  translate({ data: [1, 2, 3, 4.567] }, function (text) {
     console.log('translate result:', text);
   });
 
