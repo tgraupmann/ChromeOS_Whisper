@@ -71,7 +71,7 @@ def load_audio(file: str, sr: int = SAMPLE_RATE):
 @app.post('/translate')
 async def api_translate(item:TranslateItem):
 
-  print("SAMPLE_RATE", SAMPLE_RATE, "sampleRate", item.sampleRate, "data", len(item.data))
+  #print("SAMPLE_RATE", SAMPLE_RATE, "sampleRate", item.sampleRate, "data", len(item.data))
 
   #print("Transcription: Start...")
   #results = model.transcribe("Test_MP3.mp3", language="en")
@@ -92,10 +92,25 @@ async def api_translate(item:TranslateItem):
   resampledWave = sps.resample(rawWave, number_of_samples)
   #audio = np.array(resampledWave).astype(np.float32) / 32768.0
   audio = np.array(resampledWave).astype(np.float32)
-  print("Resampled length", len(audio), "max", max(abs(audio)))
+  #print("Resampled length", len(audio), "max", max(abs(audio)))
   #print("Resampled audio", audio)
 
   audio = whisper.pad_or_trim(audio)
+
+  # make log-Mel spectrogram and move to the same device as the model
+  #mel = whisper.log_mel_spectrogram(audio).to(model.device)
+
+  # detect the spoken language
+  #_, probs = model.detect_language(mel)
+  #print(f"Detected language: {max(probs, key=probs.get)}")
+
+  # decode the audio
+  #options = whisper.DecodingOptions()
+  #result = whisper.decode(model, mel, options)
+
+  # print the recognized text
+  #print(result.text)
+
   results = model.transcribe(audio, language="en")
 
   print("Transcription: Done!")

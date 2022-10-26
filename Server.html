@@ -28,6 +28,7 @@
       callback(this.responseText);
     });
     req.open("POST", window.location.href + "translate");
+    req.timeout = 3000;
     req.setRequestHeader("Content-Type", "application/json");
     req.send(JSON.stringify(data));
   }
@@ -103,9 +104,11 @@
                       if (json.text) {
                         txtResult.value += " " + json.text;
                         //console.log(new Date(), 'length', txtResult.value.length);
+                        /*
                         if (txtResult.value.length > 2000) {
                           txtResult.value = txtResult.value.substring(2000);
                         }
+                        */
                       }
                     }
                   });
