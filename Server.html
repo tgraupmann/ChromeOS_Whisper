@@ -93,7 +93,7 @@
                 if (!Number.isNaN(Number(volume))) {
                   lblVolume.innerText = (Number(volume) * 100).toFixed(1) + "%";
                 }
-                if (volume > 0.1) {
+                if (volume > 0.2) {
                   translate({
                     data: rawWave,
                     sampleRate: document.audioContext.sampleRate
@@ -120,7 +120,7 @@
             document.recorder.clear();
             document.recorder.record();
 
-          }, 1000);
+          }, 2500);
 
         }, function (error) {
           console.error('navigator.getUserMedia errorCallback: ', error);
