@@ -2,16 +2,21 @@
 
 <head>
   <title>Python Whisper Server</title>
+  <script src="/recorder.js"></script>
 </head>
 
 <body>
   <div style="display: flex; flex-direction: column;">
-    <div>Show Translations Here:</div>
-    <textarea id="txtResult" cols="80" rows="20"></textarea>
-    <div id="NumberOfMicrophones"></div>
-    <div id="Microphones"></div>
+    <div style="border: 1px solid black; background: #dddddd">
+      <div id="NumberOfMicrophones"></div>
+      <div id="Microphones"></div>
+    </div>
+    <div style="border: 1px solid black; background: #dddddd; display: flex; flex-direction: column;">
+      <div>Volume: <label id="lblVolume"></label></div>
+      <div>Translations:</div>
+      <textarea id="txtResult" cols="80" rows="20"></textarea>
+    </div>
   </div>
-  <canvas id="canvasRender" width="256" height="256" style="background: black"></canvas>
 </body>
 
 <script>
@@ -27,20 +32,7 @@
     req.send(JSON.stringify(data));
   }
 
-  /*
-  translate({
-    data: [1, 2, 3, 4.567],
-    sampleRate: 44100
-  }, function (text) {
-    console.log('translate result:', text);
-  });
-  */
-
-
   var MicrophonePlugin = {
-
-
-    buffer: undefined,
 
     mMicrophones: [],
 
@@ -49,11 +41,6 @@
       //console.log("Init:");
 
       const SAMPLE_RATE = 16000;
-
-      var byteOffset = 0;
-      var length = SAMPLE_RATE;
-      this.buffer = new ArrayBuffer(4 * length);
-      document.dataArray = new Float32Array(this.buffer, byteOffset, length);
 
       var constraints = {
         audio: true
@@ -72,96 +59,66 @@
 
           document.audioContext = new AudioContext({ sampleRate: SAMPLE_RATE });
           console.log('sampleRate', document.audioContext.sampleRate);
-          document.tempSize = SAMPLE_RATE;
-          document.tempArray = new Float32Array(document.tempSize)
-          document.analyser = document.audioContext.createAnalyser();
-          document.analyser.minDecibels = -90;
-          document.analyser.maxDecibels = -10;
-          document.analyser.smoothingTimeConstant = 0.85;
-
-          document.mediaRecorder = new MediaRecorder(stream);
 
           document.source = document.audioContext.createMediaStreamSource(stream);
 
-          document.source.connect(document.analyser);
+          setInterval(function () {
 
-          document.mediaRecorder.start();
-          //console.log('Microphone Status: ', document.mediaRecorder.state);
+            if (!document.recorder) {
+              document.recorder = new Recorder(document.source, { numChannels: 1 });
+              //console.log(new Date(), 'Recorder initialised.');
+            } else {
+              document.recorder.stop();
 
-          document.readDataOnInterval = function () {
+              document.recorder.getBuffer(async function (channels) {
+                //console.log(new Date(), 'channels', channels);
+                let channel = channels[0];
+                //console.log(new Date(), channel);
+                //console.log(new Date(), 'exported WAV', channel.length, channel);
 
-            if (document.dataArray == undefined) {
-              setTimeout(document.readDataOnInterval, 1000); //wait to be set
-              return;
+                let rawWave = [];
+                let volume;
+                for (let i = 0; i < channel.length; ++i) {
+                  let data = channel[i];
+                  if (i == 0) {
+                    volume = data;
+                  } else {
+                    volume = Math.max(volume, Math.abs(data));
+                  }
+                  rawWave.push(data);
+                }
+
+                //console.log(new Date(), 'volume', volume);
+                if (!Number.isNaN(Number(volume))) {
+                  lblVolume.innerText = (Number(volume) * 100).toFixed(1) + "%";
+                }
+                if (volume > 0.1) {
+                  translate({
+                    data: rawWave,
+                    sampleRate: document.audioContext.sampleRate
+                  }, function (text) {
+                    if (text.startsWith('{')) {
+                      let json = JSON.parse(text);
+                      //console.log('translate result:', json.text);
+                      if (json.text) {
+                        txtResult.value += " " + json.text;
+                        //console.log(new Date(), 'length', txtResult.value.length);
+                        if (txtResult.value.length > 2000) {
+                          txtResult.value = txtResult.value.substring(2000);
+                        }
+                      }
+                    }
+                  });
+                }
+              });
             }
 
-            // read the next chunk after interval
-            setTimeout(document.readDataOnInterval, 1000);
+            //console.log(new Date(), 'Recorder recording.');
+            document.recorder.clear();
+            document.recorder.record();
 
-            if (document.dataArray == undefined) {
-              return;
-            }
+          }, 1000);
 
-            //read the temp data buffer
-            document.analyser.getFloatTimeDomainData(document.tempArray);
-
-            // use the amplitude to get volume
-            let volume = 0;
-
-            let rawWave = [];
-
-            let j = (document.position + document.dataArray.length - document.tempSize) % document.dataArray.length;
-            for (var i = 0; i < document.tempSize; ++i) {
-              volume = Math.max(volume, Math.abs(document.tempArray[i]));
-              document.dataArray[j] = document.tempArray[i];
-              j = (j + 1) % document.dataArray.length;
-              rawWave.push(document.dataArray[j]);
-            }
-            document.position = (document.position + document.tempSize) % document.dataArray.length;
-
-            let ctx = canvasRender.getContext("2d");
-
-            ctx.fillStyle = "rgb(200, 200, 200)";
-            ctx.fillRect(0, 0, canvasRender.width, canvasRender.height);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgb(0, 0, 0)";
-            ctx.beginPath();
-
-            const sliceWidth = (canvasRender.width * 1.0) / SAMPLE_RATE;
-            let x = 0;
-
-            for (let i = 0; i < SAMPLE_RATE; i++) {
-              const v = rawWave[i] * 200.0;
-              const y = canvasRender.height / 2 + v;
-
-              if (i === 0) {
-                ctx.moveTo(x, y);
-              } else {
-                ctx.lineTo(x, y);
-              }
-              x += sliceWidth;
-            }
-
-            ctx.lineTo(canvasRender.width, canvasRender.height / 2);
-            ctx.stroke();
-
-            console.log(new Date(), 'Data read.', 'volume', volume, 'length', rawWave.length, 'data', rawWave.splice(0, 25));
-
-            console.log(new Date(), 'sampleRate', document.audioContext.sampleRate);
-
-            translate({
-              data: rawWave,
-              sampleRate: document.audioContext.sampleRate
-            }, function (text) {
-              let json = JSON.parse(text);
-              //console.log('translate result:', json.text);
-              if (json.text) {
-                txtResult.value = json.text;
-              }
-            });
-          };
-
-          document.readDataOnInterval();
         }, function (error) {
           console.error('navigator.getUserMedia errorCallback: ', error);
         });

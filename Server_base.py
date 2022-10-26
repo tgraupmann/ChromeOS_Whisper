@@ -18,14 +18,14 @@ import whisper
 
 print("Loading Whisper Model...")
 
-model = whisper.load_model("tiny")
+#model = whisper.load_model("tiny")
 #model = whisper.load_model("base") #max size supported by Samsung ChromeBook4 with 4GB of RAM
-#model = whisper.load_model("small")
+model = whisper.load_model("small")
 #model = whisper.load_model("medium")
 #model = whisper.load_model("large") # too large for my PC
 
-def readServerHtml():
-  htmlFile = open('Server.html', mode='r') 
+def readHtml(path):
+  htmlFile = open(path, mode='r') 
   htmlContent = htmlFile.read() 
   htmlFile.close()
   return htmlContent
@@ -103,6 +103,16 @@ async def api_translate(item:TranslateItem):
 
 @app.get("/", response_class=HTMLResponse)
 async def read_items():
-  return HTMLResponse(content=readServerHtml(), status_code=200)
+  return HTMLResponse(content=readHtml("Server.html"), status_code=200)
+
+# ref: https://blog.addpipe.com/using-recorder-js-to-capture-wav-audio-in-your-html5-web-site/
+
+@app.get("/recorder.js", response_class=HTMLResponse)
+async def read_items():
+  return HTMLResponse(content=readHtml("RecorderJS/recorder.js"), status_code=200)
+
+@app.get("/example_simple_exportwav.html", response_class=HTMLResponse)
+async def read_items():
+  return HTMLResponse(content=readHtml("RecorderJS/example_simple_exportwav.html"), status_code=200)
 
 print("Whisper Server loaded!")
