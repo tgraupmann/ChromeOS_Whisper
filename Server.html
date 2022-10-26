@@ -1,0 +1,32 @@
+<html>
+
+<head>
+  <title>Python Whisper Server</title>
+</head>
+
+<body>
+  <div style="display: flex; flex-direction: column;">
+    <div>Show Translations Here:</div>
+    <textarea cols="80" rows="20"></textarea>
+  </div>
+</body>
+
+<script>
+
+  function translate(data, callback) {
+    const req = new XMLHttpRequest();
+    req.addEventListener("load", function () {
+      //console.log("response:", this.responseText);
+      callback(this.responseText);
+    });
+    req.open("GET", window.location.href + "api");
+    req.send();
+  }
+
+  translate([], function (text) {
+    console.log('translate result:', text);
+  });
+
+</script>
+
+</html>
