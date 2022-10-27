@@ -7,12 +7,11 @@
 
 <body>
   <div style="display: flex; flex-direction: column;">
-    <div style="border: 1px solid black; background: #dddddd">
-      <div id="NumberOfMicrophones"></div>
-      <div id="Microphones"></div>
+    <div style="display: flex; flex-direction: row; gap: 20px; border: 1px solid black; background: #dddddd">
+      <select id="selMicrophone"></select>
+      <div>Volume: <label id="lblVolume"></label></div>
     </div>
     <div style="border: 1px solid black; background: #dddddd; display: flex; flex-direction: column;">
-      <div>Volume: <label id="lblVolume"></label></div>
       <div>Translations:</div>
       <textarea id="txtResult" cols="80" rows="20"></textarea>
     </div>
@@ -37,6 +36,8 @@
 
     mMicrophones: [],
 
+    mSelectedMicrophone: undefined,
+
     Init: function () {
 
       //console.log("Init:");
@@ -54,7 +55,7 @@
       if (navigator.getUserMedia) {
 
         navigator.getUserMedia(constraints, function (stream) {
-          //console.log('navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
+          console.log('Init: navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
 
           document.position = 0;
 
@@ -139,6 +140,8 @@
 
     QueryAudioInput: function (callback) {
 
+      //console.log('QueryAudioInput: enumerateDevices');
+
       var refThis = this;
 
       // clear
@@ -152,7 +155,7 @@
           .then(function (devices) {
             devices.forEach(function (device) {
               //console.log("QueryAudioInput: kind="+device.kind + " device=", device, " id=" + device.deviceId);
-              if (device.kind === 'audioinput') {
+              if (device.kind.startsWith('audio')) {
                 //console.log("QueryAudioInput: kind=audioinput device=", device, " id=" + device.deviceId);
                 refThis.AddMicrophone(device);
               }
@@ -177,26 +180,56 @@
 
   MicrophonePlugin.Init();
 
+  selMicrophone.onchange = function (evt) {
+    if (MicrophonePlugin.mSelectedMicrophone != MicrophonePlugin.GetMicrophoneDeviceName(selMicrophone.selectedIndex)) {
+      MicrophonePlugin.mSelectedMicrophone = MicrophonePlugin.GetMicrophoneDeviceName(selMicrophone.selectedIndex);
+      //console.log('Selected', MicrophonePlugin.mSelectedMicrophone);
+      /*
+      navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia;
+      if (navigator.getUserMedia) {
+        let constraints = {
+          audio: {
+            deviceId: {
+              exact: MicrophonePlugin.mMicrophones[selMicrophone.selectedIndex].deviceId
+            }
+          }
+        };
+        console.log('constraints', JSON.stringify(constraints, null, 2));
+        navigator.getUserMedia(constraints, function (stream) {
+          console.log('selected audio device: navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
+        }, function (error) {
+          console.error('navigator.getUserMedia errorCallback: ', error);
+        });
+      }
+      */
+    }
+  }
+
   setInterval(function () {
 
     MicrophonePlugin.QueryAudioInput(function () {
+      //console.log('Interval: Invoke QueryAudioInput');
       //console.log('Getting number of mics...');
       let numberOfMicrophones = MicrophonePlugin.GetNumberOfMicrophones();
       //console.log('Number of Microphones...', numberOfMicrophones);
-      let divNumberOfMicrophones = document.getElementById('NumberOfMicrophones');
-      if (divNumberOfMicrophones != undefined) {
-        divNumberOfMicrophones.innerText = "Number of Microphones: " + numberOfMicrophones;
+
+      selMicrophone.innerHTML = "";
+      for (let i = 0; i < numberOfMicrophones; ++i) {
+        let name = MicrophonePlugin.GetMicrophoneDeviceName(i);
+        let elOption = document.createElement("option");
+        elOption.value = i;
+        elOption.innerText = name;
+        if (!MicrophonePlugin.mSelectedMicrophone && i == 0) {
+          MicrophonePlugin.mSelectedMicrophone = name;
+        }
+        if (MicrophonePlugin.mSelectedMicrophone == name) {
+          elOption.selected = true;
+        }
+        selMicrophone.append(elOption);
       }
 
-      let divMicrophones = document.getElementById('Microphones');
-      if (divMicrophones != undefined) {
-        let text = '';
-        for (let i = 0; i < numberOfMicrophones; ++i) {
-          let name = MicrophonePlugin.GetMicrophoneDeviceName(i);
-          text += '* ' + name + "\r\n";
-        }
-        divMicrophones.innerText = text;
-      }
     });
 
   }, 1000);
