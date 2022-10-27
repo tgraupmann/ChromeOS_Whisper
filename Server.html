@@ -38,6 +38,8 @@
 
     mSelectedMicrophone: undefined,
 
+    mVolume: 0,
+
     Init: function () {
 
       //console.log("Init:");
@@ -55,7 +57,7 @@
       if (navigator.getUserMedia) {
 
         navigator.getUserMedia(constraints, function (stream) {
-          console.log('Init: navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
+          //console.log('Init: navigator.getUserMedia successCallback: ', 'constraints', constraints, 'stream', stream);
 
           document.position = 0;
 
@@ -64,12 +66,15 @@
 
           document.source = document.audioContext.createMediaStreamSource(stream);
 
-          setInterval(function () {
+          setInterval(async function () {
 
             if (!document.recorder) {
               document.recorder = new Recorder(document.source, { numChannels: 1 });
               //console.log(new Date(), 'Recorder initialised.');
+
+              document.recorder.record();
             } else {
+
               document.recorder.stop();
 
               document.recorder.getBuffer(async function (channels) {
@@ -94,34 +99,53 @@
                 if (!Number.isNaN(Number(volume))) {
                   lblVolume.innerText = (Number(volume) * 100).toFixed(1) + "%";
                 }
-                if (volume > 0.2) {
-                  translate({
-                    data: rawWave,
-                    sampleRate: document.audioContext.sampleRate
-                  }, function (text) {
-                    if (text.startsWith('{')) {
-                      let json = JSON.parse(text);
-                      //console.log('translate result:', json.text);
-                      if (json.text) {
-                        txtResult.value += " " + json.text;
-                        //console.log(new Date(), 'length', txtResult.value.length);
-                        /*
-                        if (txtResult.value.length > 2000) {
-                          txtResult.value = txtResult.value.substring(2000);
-                        }
-                        */
-                      }
-                    }
-                  });
+
+                if (volume < 0.2) {
+                  document.recorder.clear();
+                  document.recorder.record();
+                  //console.log(new Date(), 'Trim Noise');
+                  return; // trim noise
                 }
+
+                // check the last 1000 samples for volume to continue recording
+                if (channel.length > SAMPLE_RATE) {
+                  for (let i = channel.length - SAMPLE_RATE; i < channel.length; ++i) {
+                    let data = channel[i];
+                    if (Math.abs(data) > 0.2) {
+                      //console.log(new Date(), 'Continue recording...');
+                      document.recorder.record();
+                      return;
+                    }
+                  }
+                }
+
+                //console.log(new Date(), 'Translating...');
+
+                translate({
+                  data: rawWave,
+                  sampleRate: document.audioContext.sampleRate
+                }, function (text) {
+                  if (text.startsWith('{')) {
+                    let json = JSON.parse(text);
+                    //console.log('translate result:', json.text);
+                    if (json.text) {
+                      txtResult.value += " " + json.text;
+                      //console.log(new Date(), 'length', txtResult.value.length);
+                      /*
+                      if (txtResult.value.length > 2000) {
+                        txtResult.value = txtResult.value.substring(2000);
+                      }
+                      */
+                    }
+                  }
+                });
+
+                document.recorder.clear();
+                document.recorder.record();
+
               });
             }
-
-            //console.log(new Date(), 'Recorder recording.');
-            document.recorder.clear();
-            document.recorder.record();
-
-          }, 2500);
+          }, 1000);
 
         }, function (error) {
           console.error('navigator.getUserMedia errorCallback: ', error);
