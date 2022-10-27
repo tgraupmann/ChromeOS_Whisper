@@ -121,6 +121,9 @@
 
                 //console.log(new Date(), 'Translating...');
 
+                document.recorder.clear();
+                document.recorder.record();
+
                 translate({
                   data: rawWave,
                   sampleRate: document.audioContext.sampleRate
@@ -139,9 +142,6 @@
                     }
                   }
                 });
-
-                document.recorder.clear();
-                document.recorder.record();
 
               });
             }
