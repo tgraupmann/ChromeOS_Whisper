@@ -59,6 +59,7 @@
             this.txtTranslations.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTranslations.Font = new System.Drawing.Font("Calibri", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtTranslations.Location = new System.Drawing.Point(12, 74);
             this.txtTranslations.Multiline = true;
             this.txtTranslations.Name = "txtTranslations";
