@@ -1,12 +1,14 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Policy;
 using System.Text;
+using System.Threading.Channels;
 
 namespace WinForms_ServerBase
 {
@@ -15,11 +17,14 @@ namespace WinForms_ServerBase
         NAudio.Wave.WaveInEvent? Wave;
         NAudio.Wave.WasapiLoopbackCapture? CaptureDevice = null;
 
-        readonly double[] AudioValues;
+        readonly List<int> AudioValues = new List<int>();
 
-        readonly int SampleRate = 16000;
+        const int DEFAULT_SAMPLE_RATE = 16000;
+        const int DEFAULT_CHANNEL_COUNT = 1;
+
+        private int SampleRate = DEFAULT_SAMPLE_RATE;
+        private int ChannelCount = DEFAULT_CHANNEL_COUNT;
         readonly int BitDepth = 16;
-        readonly int ChannelCount = 1;
         readonly int BufferMilliseconds = 1000;
 
         private static readonly HttpClient client = new HttpClient();
@@ -27,7 +32,6 @@ namespace WinForms_ServerBase
         public Form1()
         {
             InitializeComponent();
-            AudioValues = new double[SampleRate * BufferMilliseconds / 1000];
         }
 
         private async void Translate()
@@ -48,12 +52,15 @@ namespace WinForms_ServerBase
                 jobject["sampleRate"] = SampleRate;
 
                 JArray jarray = new JArray();
-                for (int i = 0; i < AudioValues.Length; i++)
+                for (int i = 0; i < AudioValues.Count; i++)
                 {
-                    jarray.Add(AudioValues[i] / 32767.0f);
+                    float data = (float)(AudioValues[i] / 32767.0f);
+                    jarray.Add(data);
                 }
 
                 jobject["data"] = jarray;
+
+                AudioValues.Clear();
 
                 string pJsonContent = jobject.ToString();
 
@@ -102,11 +109,6 @@ namespace WinForms_ServerBase
                 CaptureDevice.StopRecording();
                 CaptureDevice.Dispose();
                 CaptureDevice = null;
-
-                for (int i = 0; i < AudioValues.Length; i++)
-                {
-                    AudioValues[i] = 0;
-                }
             }
         }
 
@@ -142,11 +144,6 @@ namespace WinForms_ServerBase
             {
                 Wave.StopRecording();
                 Wave.Dispose();
-
-                for (int i = 0; i < AudioValues.Length; i++)
-                {
-                    AudioValues[i] = 0;
-                }
             }
 
             if (cboAudioDevice.SelectedIndex == -1)
@@ -154,6 +151,9 @@ namespace WinForms_ServerBase
 
             if (cboAudioDevice.SelectedIndex < NAudio.Wave.WaveIn.DeviceCount)
             {
+                SampleRate = DEFAULT_SAMPLE_RATE;
+                ChannelCount = DEFAULT_CHANNEL_COUNT;
+
                 Wave = new NAudio.Wave.WaveInEvent()
                 {
                     DeviceNumber = cboAudioDevice.SelectedIndex,
@@ -170,10 +170,13 @@ namespace WinForms_ServerBase
 
                 var enumerator = new MMDeviceEnumerator();
                 int selectedIndex = NAudio.Wave.WaveIn.DeviceCount;
-                foreach (var wasapi in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+                foreach (MMDevice? wasapi in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
                 {
                     if (cboAudioDevice.SelectedIndex == selectedIndex)
                     {
+                        SampleRate = wasapi.AudioClient.MixFormat.SampleRate;
+                        ChannelCount = wasapi.AudioClient.MixFormat.Channels;
+
                         MMDevice loopbackCaptureDevice = wasapi;
                         CaptureDevice = new WasapiLoopbackCapture(loopbackCaptureDevice);
                         CaptureDevice.DataAvailable += Wave_DataAvailable;
@@ -191,12 +194,30 @@ namespace WinForms_ServerBase
 
         void Wave_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
-            for (int i = 0; i < e.Buffer.Length / 2; i++)
+            int bufferLength = e.BytesRecorded / 2;
+            
+            List<int> tempSample = new List<int>();
+            for (int i = 0; i < bufferLength; i += 2)
             {
-                if (i < AudioValues.Length)
-                {
-                    AudioValues[i] = BitConverter.ToInt16(e.Buffer, i * 2);
-                }
+                int data = BitConverter.ToInt16(e.Buffer, i);
+                tempSample.Add(data);
+            }
+
+            /*
+            // resample sampling rate
+            int sampleSize = firstChannelLength * DEFAULT_SAMPLE_RATE / SampleRate;
+            int increment = SampleRate / DEFAULT_SAMPLE_RATE;
+            for (int i = 0; i < tempSample.Count; i += increment)
+            {
+                int data = tempSample[i];
+                AudioValues.Add(data);
+            }
+            */
+
+            for (int i = 0; i < tempSample.Count; ++i)
+            {
+                int data = tempSample[i];
+                AudioValues.Add(data);
             }
 
             if (_mTimerSend < DateTime.Now)
