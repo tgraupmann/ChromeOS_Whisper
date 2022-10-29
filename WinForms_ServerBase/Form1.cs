@@ -27,6 +27,8 @@ namespace WinForms_ServerBase
         readonly int BitDepth = 16;
         readonly int BufferMilliseconds = 1000;
 
+        private int Volume = 0;
+
         private static readonly HttpClient client = new HttpClient();
 
         public Form1()
@@ -194,8 +196,10 @@ namespace WinForms_ServerBase
 
         void Wave_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
+            // e.BytesRecorded returns 32000 for Microphone
+            // e.BytesRecorded returns 23040 for Speakers
             int bufferLength = e.BytesRecorded / 2;
-            
+
             List<int> tempSample = new List<int>();
             for (int i = 0; i < bufferLength; i += 2)
             {
@@ -203,26 +207,37 @@ namespace WinForms_ServerBase
                 tempSample.Add(data);
             }
 
-            /*
-            // resample sampling rate
-            int sampleSize = firstChannelLength * DEFAULT_SAMPLE_RATE / SampleRate;
-            int increment = SampleRate / DEFAULT_SAMPLE_RATE;
-            for (int i = 0; i < tempSample.Count; i += increment)
-            {
-                int data = tempSample[i];
-                AudioValues.Add(data);
-            }
-            */
+            float volume = tempSample.Max() / 32767.0f;
 
-            for (int i = 0; i < tempSample.Count; ++i)
+            if (AudioValues.Count == 0 &&
+                volume < 0.02f)
             {
-                int data = tempSample[i];
-                AudioValues.Add(data);
+                // trim noise
+                return;
             }
 
-            if (_mTimerSend < DateTime.Now)
+            // Microphone input works
+            if (DEFAULT_SAMPLE_RATE == SampleRate)
             {
-                _mTimerSend = DateTime.Now + TimeSpan.FromSeconds(1);
+                for (int i = 0; i < tempSample.Count; ++i)
+                {
+                    int data = tempSample[i];
+                    AudioValues.Add(data);
+                }
+            }
+
+            else if (DEFAULT_SAMPLE_RATE < SampleRate)
+            {
+                int increment = Math.Max(1, SampleRate / DEFAULT_SAMPLE_RATE);
+                for (int i = 0; i < tempSample.Count; i += increment)
+                {
+                    int data = tempSample[i];
+                    AudioValues.Add(data);
+                }
+            }
+
+            if (AudioValues.Count > DEFAULT_SAMPLE_RATE && AudioValues.Count < (3 * DEFAULT_SAMPLE_RATE))
+            {
                 Translate();
             }
         }
