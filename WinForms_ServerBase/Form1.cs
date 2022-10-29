@@ -1,5 +1,6 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net;
@@ -176,11 +177,12 @@ namespace WinForms_ServerBase
                 {
                     if (cboAudioDevice.SelectedIndex == selectedIndex)
                     {
-                        SampleRate = wasapi.AudioClient.MixFormat.SampleRate;
-                        ChannelCount = wasapi.AudioClient.MixFormat.Channels;
+                        //SampleRate = wasapi.AudioClient.MixFormat.SampleRate;
+                        //ChannelCount = wasapi.AudioClient.MixFormat.Channels;
 
                         MMDevice loopbackCaptureDevice = wasapi;
                         CaptureDevice = new WasapiLoopbackCapture(loopbackCaptureDevice);
+                        CaptureDevice.WaveFormat = new WaveFormat(16000, 16, 1);
                         CaptureDevice.DataAvailable += Wave_DataAvailable;
                         CaptureDevice.StartRecording();
                         break;
@@ -192,12 +194,13 @@ namespace WinForms_ServerBase
             }
         }
 
-        DateTime _mTimerSend = DateTime.MinValue;
-
         void Wave_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
-            // e.BytesRecorded returns 32000 for Microphone
-            // e.BytesRecorded returns 23040 for Speakers
+            if (e.BytesRecorded == 0)
+            {
+                return;
+            }
+
             int bufferLength = e.BytesRecorded / 2;
 
             List<int> tempSample = new List<int>();
@@ -216,28 +219,19 @@ namespace WinForms_ServerBase
                 return;
             }
 
-            // Microphone input works
-            if (DEFAULT_SAMPLE_RATE == SampleRate)
+            for (int i = 0; i < tempSample.Count; ++i)
             {
-                for (int i = 0; i < tempSample.Count; ++i)
-                {
-                    int data = tempSample[i];
-                    AudioValues.Add(data);
-                }
+                int data = tempSample[i];
+                AudioValues.Add(data);
             }
 
-            else if (DEFAULT_SAMPLE_RATE < SampleRate)
+            if (AudioValues.Count > DEFAULT_SAMPLE_RATE)
             {
-                int increment = Math.Max(1, SampleRate / DEFAULT_SAMPLE_RATE);
-                for (int i = 0; i < tempSample.Count; i += increment)
+                if (volume > 0.02f && AudioValues.Count < (5 * DEFAULT_SAMPLE_RATE))
                 {
-                    int data = tempSample[i];
-                    AudioValues.Add(data);
+                    // wait to translate while talking for a while
+                    return;
                 }
-            }
-
-            if (AudioValues.Count > DEFAULT_SAMPLE_RATE && AudioValues.Count < (3 * DEFAULT_SAMPLE_RATE))
-            {
                 Translate();
             }
         }
