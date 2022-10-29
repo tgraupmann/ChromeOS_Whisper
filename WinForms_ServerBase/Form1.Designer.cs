@@ -41,7 +41,7 @@
             this.cboAudioDevice.FormattingEnabled = true;
             this.cboAudioDevice.Location = new System.Drawing.Point(12, 12);
             this.cboAudioDevice.Name = "cboAudioDevice";
-            this.cboAudioDevice.Size = new System.Drawing.Size(198, 23);
+            this.cboAudioDevice.Size = new System.Drawing.Size(367, 23);
             this.cboAudioDevice.TabIndex = 6;
             this.cboAudioDevice.SelectedIndexChanged += new System.EventHandler(this.cboAudioDevice_SelectedIndexChanged);
             // 
@@ -49,7 +49,7 @@
             // 
             this.pbVolume.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbVolume.Location = new System.Drawing.Point(216, 12);
+            this.pbVolume.Location = new System.Drawing.Point(385, 12);
             this.pbVolume.Name = "pbVolume";
             this.pbVolume.Size = new System.Drawing.Size(323, 23);
             this.pbVolume.TabIndex = 5;

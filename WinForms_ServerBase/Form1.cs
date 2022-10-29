@@ -22,7 +22,7 @@ namespace WinForms_ServerBase
         readonly int ChannelCount = 1;
         readonly int BufferMilliseconds = 1000;
 
-        //private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient();
 
         public Form1()
         {
@@ -34,12 +34,15 @@ namespace WinForms_ServerBase
         {
             try
             {
-                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                /*
+                // Initially the WSL2 guest was not allowing host traffic
+                System.Net.ServicePointManager.SecurityProtocol =
+                    SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
                 System.Net.ServicePointManager.Expect100Continue = false;
+                */
 
-                HttpClient client = new HttpClient();
-
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8000/translate");
+                HttpRequestMessage httpRequestMessage =
+                    new HttpRequestMessage(HttpMethod.Post, "http://localhost:8000/translate");
 
                 JObject jobject = new JObject();
                 jobject["sampleRate"] = SampleRate;
@@ -56,9 +59,9 @@ namespace WinForms_ServerBase
 
                 HttpContent httpContent = new StringContent(pJsonContent, Encoding.UTF8, "application/json");
                 httpRequestMessage.Content = httpContent;
-                var productValue = new ProductInfoHeaderValue("ScraperBot", "1.0");
-                var commentValue = new ProductInfoHeaderValue("(+http://www.API.com/ScraperBot.html)");
-                //httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                
+                var productValue = new ProductInfoHeaderValue("Whisper_Client", "1.0");
+                var commentValue = new ProductInfoHeaderValue("(+http://localhost:8000/transcribe)");
                 httpRequestMessage.Headers.UserAgent.Add(productValue);
                 httpRequestMessage.Headers.UserAgent.Add(commentValue);
 
@@ -67,10 +70,18 @@ namespace WinForms_ServerBase
                 {
                     using (HttpContent content = response.Content)
                     {
-                        string result = await content.ReadAsStringAsync();
+                        string text = await content.ReadAsStringAsync();
                         BeginInvoke(() =>
                         {
-                            txtTranslations.Text = result;
+                            try
+                            {
+                                JObject jobject = JObject.Parse(text);
+                                txtTranslations.Text += " " + jobject["text"];
+                            }
+                            catch
+                            {
+
+                            }
                         });
                     }
                 }
