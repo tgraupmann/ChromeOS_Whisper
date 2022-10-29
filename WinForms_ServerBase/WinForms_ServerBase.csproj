@@ -8,4 +8,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.1.0" />
+    <PackageReference Include="NAudio.Core" Version="2.1.0" />
+    <PackageReference Include="NAudio.Wasapi" Version="2.1.0" />
+  </ItemGroup>
+
 </Project>
