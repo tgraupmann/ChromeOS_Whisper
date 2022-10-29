@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.cboAudioDevice = new System.Windows.Forms.ComboBox();
             this.pbVolume = new System.Windows.Forms.ProgressBar();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtTranslations = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
@@ -54,16 +54,16 @@
             this.pbVolume.Size = new System.Drawing.Size(323, 23);
             this.pbVolume.TabIndex = 5;
             // 
-            // textBox1
+            // txtTranslations
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.txtTranslations.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(12, 74);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(776, 364);
-            this.textBox1.TabIndex = 7;
+            this.txtTranslations.Location = new System.Drawing.Point(12, 74);
+            this.txtTranslations.Multiline = true;
+            this.txtTranslations.Name = "txtTranslations";
+            this.txtTranslations.Size = new System.Drawing.Size(776, 364);
+            this.txtTranslations.TabIndex = 7;
             // 
             // label1
             // 
@@ -81,7 +81,6 @@
             // timer1
             // 
             this.timer1.Enabled = true;
-            this.timer1.Interval = 100;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form1
@@ -90,11 +89,11 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.txtTranslations);
             this.Controls.Add(this.cboAudioDevice);
             this.Controls.Add(this.pbVolume);
             this.Name = "Form1";
-            this.Text = "txtTranslations";
+            this.Text = "Whisper AI Translations";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
@@ -106,7 +105,7 @@
 
         private ComboBox cboAudioDevice;
         private ProgressBar pbVolume;
-        private TextBox textBox1;
+        private TextBox txtTranslations;
         private Label label1;
         private System.Windows.Forms.Timer timer1;
     }

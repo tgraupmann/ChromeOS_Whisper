@@ -1,5 +1,12 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Policy;
+using System.Text;
 
 namespace WinForms_ServerBase
 {
@@ -15,10 +22,66 @@ namespace WinForms_ServerBase
         readonly int ChannelCount = 1;
         readonly int BufferMilliseconds = 1000;
 
+        //private static readonly HttpClient client = new HttpClient();
+
         public Form1()
         {
             InitializeComponent();
             AudioValues = new double[SampleRate * BufferMilliseconds / 1000];
+        }
+
+        private async void Translate()
+        {
+            try
+            {
+                System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                System.Net.ServicePointManager.Expect100Continue = false;
+
+                HttpClient client = new HttpClient();
+
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://localhost:8000/translate");
+
+                JObject jobject = new JObject();
+                jobject["sampleRate"] = SampleRate;
+
+                JArray jarray = new JArray();
+                for (int i = 0; i < AudioValues.Length; i++)
+                {
+                    jarray.Add(AudioValues[i] / 32767.0f);
+                }
+
+                jobject["data"] = jarray;
+
+                string pJsonContent = jobject.ToString();
+
+                HttpContent httpContent = new StringContent(pJsonContent, Encoding.UTF8, "application/json");
+                httpRequestMessage.Content = httpContent;
+                var productValue = new ProductInfoHeaderValue("ScraperBot", "1.0");
+                var commentValue = new ProductInfoHeaderValue("(+http://www.API.com/ScraperBot.html)");
+                //httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpRequestMessage.Headers.UserAgent.Add(productValue);
+                httpRequestMessage.Headers.UserAgent.Add(commentValue);
+
+                var response = await client.SendAsync(httpRequestMessage);
+                if (response != null)
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        string result = await content.ReadAsStringAsync();
+                        BeginInvoke(() =>
+                        {
+                            txtTranslations.Text = result;
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex != null)
+                {
+
+                }
+            }
         }
 
         private void StopOutputDeviceRecording()
@@ -113,6 +176,8 @@ namespace WinForms_ServerBase
             }
         }
 
+        DateTime _mTimerSend = DateTime.MinValue;
+
         void Wave_DataAvailable(object? sender, NAudio.Wave.WaveInEventArgs e)
         {
             for (int i = 0; i < e.Buffer.Length / 2; i++)
@@ -121,6 +186,12 @@ namespace WinForms_ServerBase
                 {
                     AudioValues[i] = BitConverter.ToInt16(e.Buffer, i * 2);
                 }
+            }
+
+            if (_mTimerSend < DateTime.Now)
+            {
+                _mTimerSend = DateTime.Now + TimeSpan.FromSeconds(1);
+                Translate();
             }
         }
 
