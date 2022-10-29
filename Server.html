@@ -107,8 +107,8 @@
                   return; // trim noise
                 }
 
-                // check the last 1000 samples for volume to continue recording
-                if (channel.length > SAMPLE_RATE) {
+                // check if the user is still speaking for 10 seconds or less and then process
+                if (channel.length > SAMPLE_RATE && channel.length < (SAMPLE_RATE * 10)) {
                   for (let i = channel.length - SAMPLE_RATE; i < channel.length; ++i) {
                     let data = channel[i];
                     if (Math.abs(data) > 0.2) {
