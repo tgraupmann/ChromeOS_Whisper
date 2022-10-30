@@ -12,12 +12,12 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60" />
+            <RowDefinition Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Background="White">
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Background="White" Height="80">
             <TextBlock Margin="20" Text="Audio Device:"></TextBlock>
-            <ComboBox Margin="20" x:Name="cboAudioDevices" Foreground="Black" MinWidth="400"></ComboBox>
+            <ComboBox Margin="20" x:Name="cboAudioDevices" Foreground="Black" MinWidth="400" Height="40" SelectionChanged="cboAudioDevices_SelectionChanged"></ComboBox>
             <TextBlock Margin="20" Text="Volume:"></TextBlock>
             <Slider Margin="20" Width="250" Background="Green" Foreground="Green" Minimum="0" Maximum="100"></Slider>
         </StackPanel>        

@@ -140,6 +140,11 @@ HRESULT MainPage::EnumerateDevices(const EDataFlow dataFlow)
 }
 
 
+void Cpp_Uwp_ServerBase::MainPage::cboAudioDevices_SelectionChanged(Platform::Object^ sender, RoutedEventArgs^ e)
+{
+}
+
+
 void Cpp_Uwp_ServerBase::MainPage::Page_Unloaded(Platform::Object^ sender, RoutedEventArgs^ e)
 {
     wil::unique_couninitialize_call comUninitialize;
