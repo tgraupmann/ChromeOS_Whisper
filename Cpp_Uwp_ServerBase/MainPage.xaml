@@ -11,16 +11,16 @@
     Unloaded="Page_Unloaded">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ComboBox x:Name="cboAudioDevices" Grid.Column="0" Grid.Row="0" Width="650" Background="Red" Foreground="Black"></ComboBox>
-        <Slider Grid.Column="1" Grid.Row="0" Width="650" Background="Green" Foreground="Green" Minimum="0" Maximum="100"></Slider>
-        <TextBox Name="txtTranslations" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Background="white" Foreground="black" FontSize="16"></TextBox>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Background="White">
+            <TextBlock Margin="20" Text="Audio Device:"></TextBlock>
+            <ComboBox Margin="20" x:Name="cboAudioDevices" Foreground="Black" MinWidth="400"></ComboBox>
+            <TextBlock Margin="20" Text="Volume:"></TextBlock>
+            <Slider Margin="20" Width="250" Background="Green" Foreground="Green" Minimum="0" Maximum="100"></Slider>
+        </StackPanel>        
+        <TextBox Name="txtTranslations" Grid.Column="0" Grid.Row="1" Background="white" Foreground="black" FontSize="16"></TextBox>
     </Grid>
 </Page>

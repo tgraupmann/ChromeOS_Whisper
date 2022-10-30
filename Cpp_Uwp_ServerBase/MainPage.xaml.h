@@ -24,6 +24,6 @@ namespace Cpp_Uwp_ServerBase
 		void Translate();
 
 		HRESULT GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName);
-		HRESULT PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERole* DefaultDeviceRole);
+		HRESULT EnumerateDevices();
 	};
 }
