@@ -261,7 +261,9 @@ void MainPage::Translate()
                 txtTranslations->Dispatcher->RunAsync(CoreDispatcherPriority::Normal,
                     ref new DispatchedHandler([this, httpResponseBody]
                         {
-                            txtTranslations->Text += L" " + httpResponseBody;
+                            JsonObject^ jobject = JsonObject::Parse(httpResponseBody);
+                            String^ text = jobject->GetNamedValue(L"text")->GetString();
+                            txtTranslations->Text += L" " + text;
                         }));
             });
     }
