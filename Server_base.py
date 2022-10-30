@@ -71,7 +71,10 @@ def load_audio(file: str, sr: int = SAMPLE_RATE):
 @app.post('/translate')
 async def api_translate(item:TranslateItem):
 
-  #print("SAMPLE_RATE", SAMPLE_RATE, "sampleRate", item.sampleRate, "data", len(item.data))
+  print("SAMPLE_RATE", SAMPLE_RATE, "sampleRate", item.sampleRate, "data", len(item.data))
+
+  if len(item.data) == 0:
+    return {"text":"Data is empty!"}
 
   #print("Transcription: Start...")
   #results = model.transcribe("Test_MP3.mp3", language="en")
@@ -113,21 +116,30 @@ async def api_translate(item:TranslateItem):
 
   results = model.transcribe(audio, language="en")
 
-  print("Transcription: Done!")
+  #print("Transcription: Done!")
+  print("Transcription: Done!", "Text", results["text"])
   return {"text":results["text"]}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_items():
+  print("Send: Server.html")
+  return HTMLResponse(content=readHtml("Server.html"), status_code=200)
+
+@app.get("/Server.html", response_class=HTMLResponse)
+async def read_items():
+  print("Send: Server.html")
   return HTMLResponse(content=readHtml("Server.html"), status_code=200)
 
 # ref: https://blog.addpipe.com/using-recorder-js-to-capture-wav-audio-in-your-html5-web-site/
 
 @app.get("/recorder.js", response_class=HTMLResponse)
 async def read_items():
+  print("Send: RecorderJS/recorder.js")
   return HTMLResponse(content=readHtml("RecorderJS/recorder.js"), status_code=200)
 
 @app.get("/example_simple_exportwav.html", response_class=HTMLResponse)
 async def read_items():
+  print("Send: RecorderJS/example_simple_exportwav.html")
   return HTMLResponse(content=readHtml("RecorderJS/example_simple_exportwav.html"), status_code=200)
 
 print("Whisper Server loaded!")
