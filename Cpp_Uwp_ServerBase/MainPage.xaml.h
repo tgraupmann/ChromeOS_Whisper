@@ -6,9 +6,18 @@
 #pragma once
 
 #include "MainPage.g.h"
+#include <vector>
 
 namespace Cpp_Uwp_ServerBase
 {
+	struct DeviceInfo
+	{
+	public:
+		EDataFlow DataFlow;
+		Platform::String^ DeviceId;
+		Platform::String^ DeviceName;
+	};
+
 	/// <summary>
 	/// An empty page that can be used on its own or navigated to within a Frame.
 	/// </summary>
@@ -24,9 +33,11 @@ namespace Cpp_Uwp_ServerBase
 
 		void Translate();
 
-		HRESULT GetDeviceId(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceId);
-		HRESULT GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName);
+		HRESULT GetDeviceId(IMMDevice* device, LPWSTR* _deviceId);
+		HRESULT GetDeviceName(IMMDevice* device, LPWSTR* _deviceName);
 
 		HRESULT EnumerateDevices(const EDataFlow dataFlow);
+
+		std::vector<DeviceInfo> _mDevices; // device ids
 	};
 }

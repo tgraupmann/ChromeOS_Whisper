@@ -74,12 +74,9 @@ void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, RoutedE
 //
 //  Retrieves the device id for a particular device in a device collection.
 //
-HRESULT MainPage::GetDeviceId(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceId)
+HRESULT MainPage::GetDeviceId(IMMDevice* device, LPWSTR* _deviceId)
 {
-    wil::com_ptr_nothrow<IMMDevice> device;
     wil::unique_cotaskmem_string deviceId;
-
-    RETURN_IF_FAILED(DeviceCollection->Item(DeviceIndex, &device));
 
     RETURN_IF_FAILED(device->GetId(&deviceId));
 
@@ -92,12 +89,8 @@ HRESULT MainPage::GetDeviceId(IMMDeviceCollection* DeviceCollection, UINT Device
 //
 //  Retrieves the device friendly name for a particular device in a device collection.
 //
-HRESULT MainPage::GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName)
+HRESULT MainPage::GetDeviceName(IMMDevice* device, LPWSTR* _deviceName)
 {
-    wil::com_ptr_nothrow<IMMDevice> device;
-
-    RETURN_IF_FAILED(DeviceCollection->Item(DeviceIndex, &device));
-
     wil::com_ptr_nothrow<IPropertyStore> propertyStore;
     RETURN_IF_FAILED(device->OpenPropertyStore(STGM_READ, &propertyStore));
 
@@ -119,11 +112,9 @@ HRESULT MainPage::GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT Devi
 HRESULT MainPage::EnumerateDevices(const EDataFlow dataFlow)
 {
     wil::com_ptr_nothrow<IMMDeviceEnumerator> deviceEnumerator;
-    wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
-    wil::com_ptr_nothrow<IMMDevice> device;
-
     RETURN_IF_FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
 
+    wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
     RETURN_IF_FAILED(deviceEnumerator->EnumAudioEndpoints(dataFlow, DEVICE_STATE_ACTIVE, &deviceCollection));
 
     UINT deviceCount;
@@ -131,9 +122,22 @@ HRESULT MainPage::EnumerateDevices(const EDataFlow dataFlow)
 
     for (UINT i = 0; i < deviceCount; ++i)
     {
+        wil::com_ptr_nothrow<IMMDevice> device;
+        RETURN_IF_FAILED(deviceCollection->Item(i, &device));
+
+        wil::unique_cotaskmem_string deviceId;
+        RETURN_IF_FAILED(GetDeviceId(device.get(), &deviceId));
+
         wil::unique_cotaskmem_string deviceName;
-        RETURN_IF_FAILED(GetDeviceName(deviceCollection.get(), i, &deviceName));
-        cboAudioDevices->Items->Append(ref new String(deviceName.get()));
+        RETURN_IF_FAILED(GetDeviceName(device.get(), &deviceName));
+
+        DeviceInfo deviceInfo;
+        deviceInfo.DataFlow = dataFlow;
+        deviceInfo.DeviceId = ref new String(deviceId.get());
+        deviceInfo.DeviceName = ref new String(deviceName.get());
+
+        _mDevices.push_back(deviceInfo);
+        cboAudioDevices->Items->Append(deviceInfo.DeviceName);
     }
 
     return S_OK;
@@ -142,6 +146,55 @@ HRESULT MainPage::EnumerateDevices(const EDataFlow dataFlow)
 
 void Cpp_Uwp_ServerBase::MainPage::cboAudioDevices_SelectionChanged(Platform::Object^ sender, RoutedEventArgs^ e)
 {
+    DeviceInfo& deviceInfo = _mDevices[cboAudioDevices->SelectedIndex];
+
+    txtDevice->Text = deviceInfo.DeviceName;
+
+    wil::com_ptr_nothrow<IMMDeviceEnumerator> deviceEnumerator;
+    if (FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator))))
+    {
+        return;
+    }
+
+    wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
+    if (FAILED(deviceEnumerator->EnumAudioEndpoints(deviceInfo.DataFlow, DEVICE_STATE_ACTIVE, &deviceCollection)))
+    {
+        return;
+    }
+
+    UINT deviceCount;
+    if (FAILED(deviceCollection->GetCount(&deviceCount)))
+    {
+        return;
+    }
+
+    wil::com_ptr_nothrow<IMMDevice> device = nullptr;
+    for (UINT i = 0; i < deviceCount; ++i)
+    {
+        device = nullptr;
+        if (FAILED(deviceCollection->Item(i, &device)))
+        {
+            return;
+        }
+
+        wil::unique_cotaskmem_string deviceId;
+        if (FAILED(GetDeviceId(device.get(), &deviceId)))
+        {
+            return;
+        }
+
+        String^ compareDeviceId = ref new String(deviceId.get());
+
+        if (String::CompareOrdinal(compareDeviceId, deviceInfo.DeviceId) == 0)
+        {
+            break;
+        }
+    }
+
+    if (device == nullptr)
+    {
+        return;
+    }
 }
 
 

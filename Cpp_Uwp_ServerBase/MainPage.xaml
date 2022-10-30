@@ -13,6 +13,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80" />
+            <RowDefinition Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Background="White" Height="80">
@@ -20,7 +21,11 @@
             <ComboBox Margin="20" x:Name="cboAudioDevices" Foreground="Black" MinWidth="400" Height="40" SelectionChanged="cboAudioDevices_SelectionChanged"></ComboBox>
             <TextBlock Margin="20" Text="Volume:"></TextBlock>
             <Slider Margin="20" Width="250" Background="Green" Foreground="Green" Minimum="0" Maximum="100"></Slider>
-        </StackPanel>        
-        <TextBox Name="txtTranslations" Grid.Column="0" Grid.Row="1" Background="white" Foreground="black" FontSize="16"></TextBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Background="White" Height="80">
+            <TextBlock Margin="20" Text="Selected Audio Device:"></TextBlock>
+            <TextBlock Name="txtDevice" Margin="20"></TextBlock>
+        </StackPanel>
+        <TextBox Name="txtTranslations" Grid.Column="0" Grid.Row="2" Background="white" Foreground="black" FontSize="16"></TextBox>
     </Grid>
 </Page>
