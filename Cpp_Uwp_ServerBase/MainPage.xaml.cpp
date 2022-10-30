@@ -46,7 +46,7 @@ MainPage::MainPage()
 //
 //  Retrieves the device friendly name for a particular device in a device collection.
 //
-HRESULT GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName)
+HRESULT MainPage::GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName)
 {
     wil::com_ptr_nothrow<IMMDevice> device;
     wil::unique_cotaskmem_string deviceId;
@@ -73,7 +73,7 @@ HRESULT GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, L
 //
 //  Based on the input switches, pick the specified device to use.
 //
-HRESULT PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERole* DefaultDeviceRole)
+HRESULT MainPage::PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERole* DefaultDeviceRole)
 {
     wil::com_ptr_nothrow<IMMDeviceEnumerator> deviceEnumerator;
     wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
@@ -105,6 +105,7 @@ HRESULT PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERole* Defaul
             wil::unique_cotaskmem_string deviceName;
 
             RETURN_IF_FAILED(GetDeviceName(deviceCollection.get(), i, &deviceName));
+            cboAudioDevices->Items->Append(ref new Platform::String(deviceName.get()));
             printf("    %d:  %ls\n", i + 3, deviceName.get());
         }
         wchar_t choice[10];
