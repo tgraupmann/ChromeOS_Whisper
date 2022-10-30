@@ -4,3 +4,5 @@ __pycache__/
 .vs
 obj
 bin
+Generated Files
+x64
