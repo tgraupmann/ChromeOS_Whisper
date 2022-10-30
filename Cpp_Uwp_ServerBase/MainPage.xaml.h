@@ -23,7 +23,9 @@ namespace Cpp_Uwp_ServerBase
 
 		void Translate();
 
+		HRESULT GetDeviceId(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceId);
 		HRESULT GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName);
-		HRESULT EnumerateDevices();
+
+		HRESULT EnumerateDevices(const EDataFlow dataFlow);
 	};
 }

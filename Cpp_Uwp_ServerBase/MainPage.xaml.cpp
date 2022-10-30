@@ -52,61 +52,6 @@ MainPage::MainPage()
 }
 
 
-//
-//  Retrieves the device friendly name for a particular device in a device collection.
-//
-HRESULT MainPage::GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName)
-{
-    wil::com_ptr_nothrow<IMMDevice> device;
-    wil::unique_cotaskmem_string deviceId;
-
-    RETURN_IF_FAILED(DeviceCollection->Item(DeviceIndex, &device));
-
-    RETURN_IF_FAILED(device->GetId(&deviceId));
-
-    wil::com_ptr_nothrow<IPropertyStore> propertyStore;
-    RETURN_IF_FAILED(device->OpenPropertyStore(STGM_READ, &propertyStore));
-
-    wil::unique_prop_variant friendlyName;
-    RETURN_IF_FAILED(propertyStore->GetValue(PKEY_Device_FriendlyName, &friendlyName));
-
-    wil::unique_cotaskmem_string deviceName;
-    RETURN_IF_FAILED(wil::str_printf_nothrow(deviceName, L"%ls (%ls)", friendlyName.vt != VT_LPWSTR ? L"Unknown" : friendlyName.pwszVal, deviceId.get()));
-
-    *_deviceName = deviceName.release();
-
-    return S_OK;
-}
-
-
-//
-//  Based on the input switches, pick the specified device to use.
-//
-HRESULT MainPage::EnumerateDevices()
-{
-    wil::com_ptr_nothrow<IMMDeviceEnumerator> deviceEnumerator;
-    wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
-    wil::com_ptr_nothrow<IMMDevice> device;
-
-    RETURN_IF_FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
-
-    RETURN_IF_FAILED(deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &deviceCollection));
-
-    UINT deviceCount;
-    RETURN_IF_FAILED(deviceCollection->GetCount(&deviceCount));
-
-    for (UINT i = 0; i < deviceCount; i += 1)
-    {
-        wil::unique_cotaskmem_string deviceName;
-
-        RETURN_IF_FAILED(GetDeviceName(deviceCollection.get(), i, &deviceName));
-        cboAudioDevices->Items->Append(ref new String(deviceName.get()));
-    }
-
-    return S_OK;
-}
-
-
 void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, RoutedEventArgs^ e)
 {
     //
@@ -121,7 +66,77 @@ void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, RoutedE
     // Unit Test
     Translate();
 
-    EnumerateDevices();
+    EnumerateDevices(eCapture);
+    EnumerateDevices(eRender);
+}
+
+
+//
+//  Retrieves the device id for a particular device in a device collection.
+//
+HRESULT MainPage::GetDeviceId(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceId)
+{
+    wil::com_ptr_nothrow<IMMDevice> device;
+    wil::unique_cotaskmem_string deviceId;
+
+    RETURN_IF_FAILED(DeviceCollection->Item(DeviceIndex, &device));
+
+    RETURN_IF_FAILED(device->GetId(&deviceId));
+
+    *_deviceId = deviceId.release();
+
+    return S_OK;
+}
+
+
+//
+//  Retrieves the device friendly name for a particular device in a device collection.
+//
+HRESULT MainPage::GetDeviceName(IMMDeviceCollection* DeviceCollection, UINT DeviceIndex, LPWSTR* _deviceName)
+{
+    wil::com_ptr_nothrow<IMMDevice> device;
+
+    RETURN_IF_FAILED(DeviceCollection->Item(DeviceIndex, &device));
+
+    wil::com_ptr_nothrow<IPropertyStore> propertyStore;
+    RETURN_IF_FAILED(device->OpenPropertyStore(STGM_READ, &propertyStore));
+
+    wil::unique_prop_variant friendlyName;
+    RETURN_IF_FAILED(propertyStore->GetValue(PKEY_Device_FriendlyName, &friendlyName));
+
+    wil::unique_cotaskmem_string deviceName;
+    RETURN_IF_FAILED(wil::str_printf_nothrow(deviceName, L"%ls", friendlyName.vt != VT_LPWSTR ? L"Unknown" : friendlyName.pwszVal));
+
+    *_deviceName = deviceName.release();
+
+    return S_OK;
+}
+
+
+//
+//  Based on the input switches, pick the specified device to use.
+//
+HRESULT MainPage::EnumerateDevices(const EDataFlow dataFlow)
+{
+    wil::com_ptr_nothrow<IMMDeviceEnumerator> deviceEnumerator;
+    wil::com_ptr_nothrow<IMMDeviceCollection> deviceCollection;
+    wil::com_ptr_nothrow<IMMDevice> device;
+
+    RETURN_IF_FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
+
+    RETURN_IF_FAILED(deviceEnumerator->EnumAudioEndpoints(dataFlow, DEVICE_STATE_ACTIVE, &deviceCollection));
+
+    UINT deviceCount;
+    RETURN_IF_FAILED(deviceCollection->GetCount(&deviceCount));
+
+    for (UINT i = 0; i < deviceCount; ++i)
+    {
+        wil::unique_cotaskmem_string deviceName;
+        RETURN_IF_FAILED(GetDeviceName(deviceCollection.get(), i, &deviceName));
+        cboAudioDevices->Items->Append(ref new String(deviceName.get()));
+    }
+
+    return S_OK;
 }
 
 
