@@ -21,6 +21,6 @@
         </Grid.RowDefinitions>
         <ComboBox x:Name="cboAudioDevices" Grid.Column="0" Grid.Row="0" Width="650" Background="Red" Foreground="Black"></ComboBox>
         <Slider Grid.Column="1" Grid.Row="0" Width="650" Background="Green" Foreground="Green" Minimum="0" Maximum="100"></Slider>
-        <TextBox Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Background="white" Foreground="black" FontSize="16" Text="ABCDEF"></TextBox>
+        <TextBox Name="txtTranslations" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Background="white" Foreground="black" FontSize="16"></TextBox>
     </Grid>
 </Page>

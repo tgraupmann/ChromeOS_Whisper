@@ -10,11 +10,16 @@
 #include <wil/result.h>
 #include <wil/com.h>
 
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Web.Http.Headers.h>
+
 using namespace Cpp_Uwp_ServerBase;
 
 using namespace Platform;
+using namespace Windows::Data::Json;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
@@ -22,6 +27,10 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::Storage::Streams;
+using namespace Windows::Web::Http;
+using namespace Windows::Web::Http::Headers;
+using namespace winrt;
 
 int TargetFrequency = 440;
 int TargetLatency = 30;
@@ -105,7 +114,7 @@ HRESULT MainPage::PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERo
             wil::unique_cotaskmem_string deviceName;
 
             RETURN_IF_FAILED(GetDeviceName(deviceCollection.get(), i, &deviceName));
-            cboAudioDevices->Items->Append(ref new Platform::String(deviceName.get()));
+            cboAudioDevices->Items->Append(ref new String(deviceName.get()));
             printf("    %d:  %ls\n", i + 3, deviceName.get());
         }
         wchar_t choice[10];
@@ -167,7 +176,7 @@ HRESULT MainPage::PickDevice(IMMDevice** DeviceToUse, bool* IsDefaultDevice, ERo
 }
 
 
-void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, RoutedEventArgs^ e)
 {
     //
     //  A GUI application should use COINIT_APARTMENTTHREADED instead of COINIT_MULTITHREADED.
@@ -177,6 +186,9 @@ void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, Windows
         printf("Unable to initialize COM\n");
         return;
     }
+
+    // Unit Test
+    Translate();
 
     wil::com_ptr_nothrow<IMMDevice> device;
     bool isDefaultDevice;
@@ -188,7 +200,74 @@ void Cpp_Uwp_ServerBase::MainPage::Page_Loaded(Platform::Object^ sender, Windows
 }
 
 
-void Cpp_Uwp_ServerBase::MainPage::Page_Unloaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void Cpp_Uwp_ServerBase::MainPage::Page_Unloaded(Platform::Object^ sender, RoutedEventArgs^ e)
 {
     wil::unique_couninitialize_call comUninitialize;
+}
+
+void MainPage::Translate()
+{
+    //ref: https://learn.microsoft.com/en-us/windows/uwp/networking/httpclient
+    //translated from WinRT C++ Sample to UWP
+
+    // Create an HttpClient object.
+    HttpClient httpClient;
+
+    // Add a user-agent header to the GET request.
+    HttpRequestHeaderCollection^ headers = httpClient.DefaultRequestHeaders;
+
+    // The safe way to add a header value is to use the TryParseAdd method, and verify the return value is true.
+    // This is especially important if the header value is coming from user input.
+    String^ header = ref new String(L"ie");
+    if (!headers->UserAgent->TryParseAdd(header))
+    {
+        //Invalid header value
+        return;
+    }
+
+    String^ url = ref new String(L"http://localhost:8000/translate");
+    Uri^ requestUri = ref new Uri(url);
+
+    // Send the GET request asynchronously, and retrieve the response as a string.
+    try
+    {
+        // Send the POST request.
+        HttpRequestMessage^ httpRequestMessage = ref new HttpRequestMessage(HttpMethod::Post, requestUri);
+
+        // Construct the JSON to post.
+        JsonObject^ jobject = ref new JsonObject();
+        jobject->SetNamedValue(ref new String(L"sampleRate"), JsonValue::CreateNumberValue(16000));
+        JsonArray^ jarray = ref new JsonArray();
+        jobject->SetNamedValue(ref new String(L"data"), jarray);
+
+        String^ jsonBody = jobject->ToString();
+
+        HttpStringContent^ jsonContent = ref new HttpStringContent(
+            jsonBody,
+            UnicodeEncoding::Utf8,
+            L"application/json");
+
+        IAsyncOperationWithProgress<HttpResponseMessage^, HttpProgress>^ opPostAsync =
+            httpClient.PostAsync(requestUri, jsonContent);
+        opPostAsync->Completed = ref new AsyncOperationWithProgressCompletedHandler<HttpResponseMessage^, HttpProgress>(
+            [=](IAsyncOperationWithProgress<HttpResponseMessage^, HttpProgress>^ asyncInfo,
+                AsyncStatus)
+            {
+                HttpResponseMessage^ httpResponseMessage = asyncInfo->GetResults();
+                httpResponseMessage->EnsureSuccessStatusCode();
+                String^ httpResponseBody = httpResponseMessage->Content->ReadAsStringAsync()->GetResults();
+
+                // run on UI thread
+                txtTranslations->Dispatcher->RunAsync(CoreDispatcherPriority::Normal,
+                    ref new DispatchedHandler([this, httpResponseBody]
+                        {
+                            txtTranslations->Text += L" " + httpResponseBody;
+                        }));
+            });
+    }
+    catch (winrt::hresult_error const&)
+    {
+        // failed
+        return;
+    }
 }
