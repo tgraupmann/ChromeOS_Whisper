@@ -13,6 +13,8 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Web.Http.Headers.h>
 
+#include "DeviceState.h"
+
 using namespace Cpp_Uwp_ServerBase;
 
 using namespace Platform;
