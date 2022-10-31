@@ -49,7 +49,7 @@ namespace winrt::SDKTemplate::implementation
             if (m_deviceState != state)
             {
                 m_deviceState = state;
-                m_deviceStateChanged(*static_cast<D*>(this), make<implementation::DeviceStateChangedEventArgs>(state, error));
+                //m_deviceStateChanged(*static_cast<D*>(this), make<implementation::DeviceStateChangedEventArgs>(state, error));
             }
         }
 
