@@ -3,4 +3,7 @@
   <ItemGroup>
     <Midl Include="Project.idl" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

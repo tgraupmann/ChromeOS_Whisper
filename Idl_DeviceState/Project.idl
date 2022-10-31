@@ -9,6 +9,8 @@
 //
 //*********************************************************
 
+// Add NuGet Package: Microsoft.Windows.CppWinRT
+
 namespace SDKTemplate
 {
     // NB: All states >= Initialized will allow some methods
