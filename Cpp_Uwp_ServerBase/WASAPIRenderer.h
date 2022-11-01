@@ -53,17 +53,10 @@ namespace winrt::SDKTemplate
         HRESULT OnPausePlayback(IMFAsyncResult* pResult);
         HRESULT OnSampleReady(IMFAsyncResult* pResult);
 
-        EmbeddedMFAsyncCallback<&WASAPIRenderer::OnStartPlayback>* m_StartPlaybackCallback;
-        EmbeddedMFAsyncCallback<&WASAPIRenderer::OnStopPlayback>* m_StopPlaybackCallback;
-        EmbeddedMFAsyncCallback<&WASAPIRenderer::OnPausePlayback>* m_PausePlaybackCallback;
-        EmbeddedMFAsyncCallback<&WASAPIRenderer::OnSampleReady>* m_SampleReadyCallback;
-
-        /*
         EmbeddedMFAsyncCallback<&WASAPIRenderer::OnStartPlayback> m_StartPlaybackCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPIRenderer::OnStopPlayback> m_StopPlaybackCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPIRenderer::OnPausePlayback> m_PausePlaybackCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPIRenderer::OnSampleReady> m_SampleReadyCallback{ this };
-        */
 
         HRESULT ConfigureDeviceInternal() noexcept;
         void ValidateBufferValue();

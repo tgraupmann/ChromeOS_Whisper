@@ -38,19 +38,11 @@ namespace winrt::SDKTemplate
         HRESULT OnSampleReady(IMFAsyncResult* pResult);
         HRESULT OnSendScopeData(IMFAsyncResult* pResult);
 
-        EmbeddedMFAsyncCallback<&WASAPICapture::OnStartCapture>* m_StartCaptureCallback;
-        EmbeddedMFAsyncCallback<&WASAPICapture::OnStopCapture>* m_StopCaptureCallback;
-        EmbeddedMFAsyncCallback<&WASAPICapture::OnSampleReady>* m_SampleReadyCallback;
-        EmbeddedMFAsyncCallback<&WASAPICapture::OnFinishCapture>* m_FinishCaptureCallback;
-        EmbeddedMFAsyncCallback<&WASAPICapture::OnSendScopeData>* m_SendScopeDataCallback;
-
-        /*
         EmbeddedMFAsyncCallback<&WASAPICapture::OnStartCapture> m_StartCaptureCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPICapture::OnStopCapture> m_StopCaptureCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPICapture::OnSampleReady> m_SampleReadyCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPICapture::OnFinishCapture> m_FinishCaptureCallback{ this };
         EmbeddedMFAsyncCallback<&WASAPICapture::OnSendScopeData> m_SendScopeDataCallback{ this };
-        */
 
         fire_and_forget CreateWAVFile();
         fire_and_forget FixWAVHeader();

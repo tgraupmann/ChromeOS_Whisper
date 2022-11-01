@@ -28,7 +28,7 @@ namespace winrt::SDKTemplate
     WASAPICapture::WASAPICapture()
     {
         // Set the capture event work queue to use the MMCSS queue
-        m_SampleReadyCallback->SetQueueID(m_queueId.get());
+        m_SampleReadyCallback.SetQueueID(m_queueId.get());
     }
 
     //
@@ -154,7 +154,7 @@ namespace winrt::SDKTemplate
         m_audioCaptureClient.capture(m_audioClient, &IAudioClient::GetService);
 
         // Create Async callback for sample events
-        check_hresult(MFCreateAsyncResult(nullptr, m_SampleReadyCallback, nullptr, m_sampleReadyAsyncResult.put()));
+        check_hresult(MFCreateAsyncResult(nullptr, &m_SampleReadyCallback, nullptr, m_sampleReadyAsyncResult.put()));
 
         // Provides the event handle for the system to signal when an audio buffer is ready to be processed by the client
         check_hresult(m_audioClient->SetEventHandle(m_SampleReadyEvent.get()));
@@ -298,7 +298,7 @@ namespace winrt::SDKTemplate
         if (m_deviceState == DeviceState::Initialized)
         {
             SetState(DeviceState::Starting);
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StartCaptureCallback, nullptr);
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StartCaptureCallback, nullptr);
         }
     }
 
@@ -335,7 +335,7 @@ namespace winrt::SDKTemplate
         {
             SetState(DeviceState::Stopping);
 
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StopCaptureCallback, nullptr);
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StopCaptureCallback, nullptr);
         }
     }
 
@@ -392,7 +392,7 @@ namespace winrt::SDKTemplate
 
         if (m_deviceState == DeviceState::Flushing)
         {
-            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_FinishCaptureCallback, nullptr));
+            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_FinishCaptureCallback, nullptr));
         }
     }
 
@@ -576,7 +576,7 @@ namespace winrt::SDKTemplate
             m_plotDataPointsFilled = 0;
 
             plotDataBuffer.Length(m_plotDataMaxPoints * sizeof(int16_t));
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_SendScopeDataCallback, winrt::get_unknown(plotDataBuffer));
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_SendScopeDataCallback, winrt::get_unknown(plotDataBuffer));
 
             // Create a new buffer to hold the next set of points.
             m_plotDataBuffer = Buffer(sizeof(int16_t) * m_plotDataMaxPoints);

@@ -99,10 +99,9 @@ namespace winrt::SDKTemplate
 
         EmbeddedMFAsyncCallback(ParentPtr parent) : m_parent(parent) {}
 
-        /*
         STDMETHOD(QueryInterface)(REFIID riid, void** ppvObject) final
         {
-            if (is_guid_of<::IMFAsyncCallback, ::IUnknown>(riid))
+            //if (is_guid_of<::IMFAsyncCallback, ::IUnknown>(riid))
             {
                 (*ppvObject) = this;
                 AddRef();
@@ -111,7 +110,6 @@ namespace winrt::SDKTemplate
             *ppvObject = nullptr;
             return E_NOINTERFACE;
         }
-        */
 
         STDMETHOD_(ULONG, AddRef)() final { return m_parent->AddRef(); }
         STDMETHOD_(ULONG, Release)() final { return m_parent->Release(); }

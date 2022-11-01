@@ -90,7 +90,7 @@ namespace winrt::SDKTemplate
         m_AudioRenderClient.capture(m_AudioClient, &IAudioClient::GetService);
 
         // Create Async callback for sample events
-        check_hresult(MFCreateAsyncResult(nullptr, m_SampleReadyCallback, nullptr, m_SampleReadyAsyncResult.put()));
+        check_hresult(MFCreateAsyncResult(nullptr, &m_SampleReadyCallback, nullptr, m_SampleReadyAsyncResult.put()));
 
         // Sets the event handle that the system signals when an audio buffer is ready to be processed by the client
         check_hresult(m_AudioClient->SetEventHandle(m_SampleReadyEvent.get()));
@@ -297,11 +297,11 @@ namespace winrt::SDKTemplate
             ConfigureSource();
 
             SetState(DeviceState::Starting, S_OK);
-            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StartPlaybackCallback, nullptr));
+            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StartPlaybackCallback, nullptr));
             break;
 
         case DeviceState::Paused:
-            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StartPlaybackCallback, nullptr));
+            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StartPlaybackCallback, nullptr));
             break;
 
         default:
@@ -365,7 +365,7 @@ namespace winrt::SDKTemplate
 
         SetState(DeviceState::Stopping, S_OK);
 
-        return MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StopPlaybackCallback, nullptr);
+        return MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StopPlaybackCallback, nullptr);
     }
 
     //
@@ -429,7 +429,7 @@ namespace winrt::SDKTemplate
         // Don't notify clients.
         SetStateNoNotify(DeviceState::Pausing);
 
-        return MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_PausePlaybackCallback, nullptr);
+        return MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_PausePlaybackCallback, nullptr);
 
     }
 
