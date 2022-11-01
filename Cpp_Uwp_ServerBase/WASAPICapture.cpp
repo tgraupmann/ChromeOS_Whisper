@@ -10,9 +10,6 @@
 
 #include "pch.h"
 #include "WASAPICapture.h"
-#include "DeviceState.h"
-#include <winrt/Windows.Media.Devices.h>
-#include <winrt/Windows.Storage.Streams.h>
 
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Media::Devices;
@@ -30,10 +27,8 @@ namespace winrt::SDKTemplate
 
     WASAPICapture::WASAPICapture()
     {
-        /*
         // Set the capture event work queue to use the MMCSS queue
-        m_SampleReadyCallback.SetQueueID(m_queueId.get());
-        */
+        m_SampleReadyCallback->SetQueueID(m_queueId.get());
     }
 
     //
@@ -55,7 +50,7 @@ namespace winrt::SDKTemplate
     }
     catch (...)
     {
-        //SetState(DeviceState::Error, to_hresult());
+        SetState(DeviceState::Error, to_hresult());
     }
 
     //
@@ -66,7 +61,6 @@ namespace winrt::SDKTemplate
     //
     HRESULT WASAPICapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperation* operation) try
     {
-        /*
         HRESULT status = S_OK;
         com_ptr<::IUnknown> punkAudioInterface;
 
@@ -160,7 +154,7 @@ namespace winrt::SDKTemplate
         m_audioCaptureClient.capture(m_audioClient, &IAudioClient::GetService);
 
         // Create Async callback for sample events
-        check_hresult(MFCreateAsyncResult(nullptr, &m_SampleReadyCallback, nullptr, m_sampleReadyAsyncResult.put()));
+        check_hresult(MFCreateAsyncResult(nullptr, m_SampleReadyCallback, nullptr, m_sampleReadyAsyncResult.put()));
 
         // Provides the event handle for the system to signal when an audio buffer is ready to be processed by the client
         check_hresult(m_audioClient->SetEventHandle(m_SampleReadyEvent.get()));
@@ -171,14 +165,12 @@ namespace winrt::SDKTemplate
         // Creates the WAV file asynchronously.  If successful, will transition to DeviceState::Initialized
         CreateWAVFile();
 
-        */
-
         // Need to return S_OK
         return S_OK;
     }
     catch (...)
     {
-        //SetState(DeviceState::Error, to_hresult());
+        SetState(DeviceState::Error, to_hresult());
         m_audioClient = nullptr;
         m_audioCaptureClient = nullptr;
         m_sampleReadyAsyncResult = nullptr;
@@ -194,7 +186,6 @@ namespace winrt::SDKTemplate
     //
     fire_and_forget WASAPICapture::CreateWAVFile() try
     {
-        /*
         auto lifetime = get_strong();
 
         // Create the WAV file, appending a number if file already exists
@@ -234,11 +225,7 @@ namespace winrt::SDKTemplate
         // Wait for file data to be written to file
         co_await m_dataWriter.FlushAsync();
 
-        */
-
         SetState(DeviceState::Initialized);
-
-        co_return;
     }
     catch (...)
     {
@@ -252,7 +239,6 @@ namespace winrt::SDKTemplate
     //
     fire_and_forget WASAPICapture::FixWAVHeader() try
     {
-        /*
         auto lifetime = get_strong();
 
         // Prepare a buffer to write DWORDs into the stream header.
@@ -274,11 +260,8 @@ namespace winrt::SDKTemplate
 
         co_await stream.FlushAsync();
         stream.Close();
-        */
 
         SetState(DeviceState::Stopped);
-
-        co_return;
     }
     catch (...)
     {
@@ -311,14 +294,12 @@ namespace winrt::SDKTemplate
     //
     void WASAPICapture::AsyncStartCapture()
     {
-        /*
         // We should be in the initialzied state if this is the first time through getting ready to capture.
         if (m_deviceState == DeviceState::Initialized)
         {
             SetState(DeviceState::Starting);
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StartCaptureCallback, nullptr);
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StartCaptureCallback, nullptr);
         }
-        */
     }
 
     //
@@ -349,15 +330,13 @@ namespace winrt::SDKTemplate
     //
     void WASAPICapture::AsyncStopCapture()
     {
-        /*
         if ((m_deviceState == DeviceState::Capturing) ||
             (m_deviceState == DeviceState::Error))
         {
             SetState(DeviceState::Stopping);
 
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_StopCaptureCallback, nullptr);
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_StopCaptureCallback, nullptr);
         }
-        */
     }
 
     //
@@ -400,7 +379,6 @@ namespace winrt::SDKTemplate
     //
     fire_and_forget WASAPICapture::AsyncStoreData()
     {
-        /*
         auto lifetime = get_strong();
 
         co_await m_dataWriter.StoreAsync();
@@ -414,11 +392,8 @@ namespace winrt::SDKTemplate
 
         if (m_deviceState == DeviceState::Flushing)
         {
-            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_FinishCaptureCallback, nullptr));
+            check_hresult(MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_FinishCaptureCallback, nullptr));
         }
-        */
-
-        co_return;
     }
 
     //
@@ -572,7 +547,6 @@ namespace winrt::SDKTemplate
     //
     void WASAPICapture::ProcessScopeData(array_view<uint8_t> rawBytes)
     {
-        /*
         // There is no buffer if the data format is not one we support.
         // (For now, the only format we support is 16-bit audio.)
         if (m_plotDataBuffer == nullptr)
@@ -602,12 +576,11 @@ namespace winrt::SDKTemplate
             m_plotDataPointsFilled = 0;
 
             plotDataBuffer.Length(m_plotDataMaxPoints * sizeof(int16_t));
-            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, &m_SendScopeDataCallback, winrt::get_unknown(plotDataBuffer));
+            MFPutWorkItem2(MFASYNC_CALLBACK_QUEUE_MULTITHREADED, 0, m_SendScopeDataCallback, winrt::get_unknown(plotDataBuffer));
 
             // Create a new buffer to hold the next set of points.
             m_plotDataBuffer = Buffer(sizeof(int16_t) * m_plotDataMaxPoints);
         }
-        */
     }
 
     //
@@ -619,7 +592,7 @@ namespace winrt::SDKTemplate
     {
         com_ptr<::IUnknown> points;
         check_hresult(pResult->GetState(points.put()));
-        //ReportPlotDataReady(points.as<IBuffer>());
+        ReportPlotDataReady(points.as<IBuffer>());
         return S_OK;
     }
     catch (...)

@@ -9,21 +9,16 @@
 //*********************************************************
 
 #pragma once
-
 #include "pch.h"
-#include <mmdeviceapi.h>
-#include <mfobjects.h>
-#include <mfapi.h>
-#include <winrt/Windows.Storage.h>
-#include <Audioclient.h>
-#include "Common.h"
 #include "DeviceState.h"
+#include "PlotData.h"
 
 namespace winrt::SDKTemplate
 {
     // Primary WASAPI Capture Class
-    struct WASAPICapture : winrt::implements<WASAPICapture, IActivateAudioInterfaceCompletionHandler>,
-        winrt::SDKTemplate::implementation::DeviceStateSourceT<WASAPICapture>
+    struct WASAPICapture : winrt::implements<WASAPICapture, IActivateAudioInterfaceCompletionHandler, IDeviceStateSource, IPlotDataSource>,
+        implementation::DeviceStateSourceT<WASAPICapture>,
+        implementation::PlotDataSourceT<WASAPICapture>
     {
     public:
         WASAPICapture();
@@ -42,6 +37,12 @@ namespace winrt::SDKTemplate
         HRESULT OnFinishCapture(IMFAsyncResult* pResult);
         HRESULT OnSampleReady(IMFAsyncResult* pResult);
         HRESULT OnSendScopeData(IMFAsyncResult* pResult);
+
+        EmbeddedMFAsyncCallback<&WASAPICapture::OnStartCapture>* m_StartCaptureCallback;
+        EmbeddedMFAsyncCallback<&WASAPICapture::OnStopCapture>* m_StopCaptureCallback;
+        EmbeddedMFAsyncCallback<&WASAPICapture::OnSampleReady>* m_SampleReadyCallback;
+        EmbeddedMFAsyncCallback<&WASAPICapture::OnFinishCapture>* m_FinishCaptureCallback;
+        EmbeddedMFAsyncCallback<&WASAPICapture::OnSendScopeData>* m_SendScopeDataCallback;
 
         /*
         EmbeddedMFAsyncCallback<&WASAPICapture::OnStartCapture> m_StartCaptureCallback{ this };

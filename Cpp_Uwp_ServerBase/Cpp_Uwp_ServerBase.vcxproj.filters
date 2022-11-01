@@ -15,12 +15,19 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="WASAPICapture.cpp" />
+    <ClCompile Include="WASAPIRenderer.cpp" />
+    <ClCompile Include="ToneSampleGenerator.cpp" />
+    <ClCompile Include="MFSampleGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="DeviceState.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="WASAPICapture.h" />
+    <ClInclude Include="PlotData.h" />
+    <ClInclude Include="WASAPIRenderer.h" />
+    <ClInclude Include="ToneSampleGenerator.h" />
+    <ClInclude Include="MFSampleGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -53,5 +60,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />
   </ItemGroup>
 </Project>

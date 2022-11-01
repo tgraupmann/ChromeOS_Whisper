@@ -89,7 +89,7 @@ namespace winrt::SDKTemplate
     // Helper class for allowing a class to implement multiple versions of
     // IMFAsyncCallback.
     template<auto Callback>
-    struct EmbeddedMFAsyncCallback : ::IMFAsyncCallback
+    struct EmbeddedMFAsyncCallback: ::IMFAsyncCallback
     {
         template<typename Parent> static Parent* parent_finder(HRESULT(Parent::*)(IMFAsyncResult*)) { return nullptr; }
         using ParentPtr = decltype(parent_finder(Callback));
@@ -99,6 +99,7 @@ namespace winrt::SDKTemplate
 
         EmbeddedMFAsyncCallback(ParentPtr parent) : m_parent(parent) {}
 
+        /*
         STDMETHOD(QueryInterface)(REFIID riid, void** ppvObject) final
         {
             if (is_guid_of<::IMFAsyncCallback, ::IUnknown>(riid))
@@ -110,6 +111,7 @@ namespace winrt::SDKTemplate
             *ppvObject = nullptr;
             return E_NOINTERFACE;
         }
+        */
 
         STDMETHOD_(ULONG, AddRef)() final { return m_parent->AddRef(); }
         STDMETHOD_(ULONG, Release)() final { return m_parent->Release(); }
