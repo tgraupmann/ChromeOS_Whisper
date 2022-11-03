@@ -5,7 +5,13 @@
 
 #pragma once
 
+#include "pch.h"
 #include "MainPage.g.h"
+#include "WASAPICapture.h"
+#include "Common.h"
+#include "SDKTemplate.0.h"
+#include "SDKTemplate.1.h"
+#include "SDKTemplate.2.h"
 #include <vector>
 
 namespace Cpp_Uwp_ServerBase
@@ -39,5 +45,19 @@ namespace Cpp_Uwp_ServerBase
 		HRESULT EnumerateDevices(const EDataFlow dataFlow);
 
 		std::vector<DeviceInfo> _mDevices; // device ids
+
+		winrt::event_token m_deviceStateChangeToken;
+		winrt::event_token m_plotDataReadyToken;
+
+		int m_discontinuityCount;
+		bool m_isLowLatency;
+		winrt::com_ptr<winrt::SDKTemplate::WASAPICapture> m_capture;
+
+		// UI Helpers
+		void UpdateMediaControlUI(winrt::SDKTemplate::DeviceState deviceState);
+
+		// Handlers
+		winrt::fire_and_forget OnDeviceStateChange(winrt::SDKTemplate::IDeviceStateSource const& sender, winrt::SDKTemplate::DeviceStateChangedEventArgs e);
+		winrt::fire_and_forget OnPlotDataReady(winrt::SDKTemplate::IPlotDataSource const& sender, winrt::SDKTemplate::PlotDataReadyEventArgs e);
 	};
 }
