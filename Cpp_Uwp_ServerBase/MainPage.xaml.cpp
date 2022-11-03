@@ -267,6 +267,7 @@ void MainPage::StartCapture()
 fire_and_forget MainPage::OnDeviceStateChange(IDeviceStateSource const&, SDKTemplate::DeviceStateChangedEventArgs e)
 {
     //auto lifetime = get_strong();
+    auto lifetime = this;
 
     // Get the current time for messages
     std::time_t now = clock::to_time_t(clock::now());
@@ -362,6 +363,7 @@ fire_and_forget MainPage::OnDeviceStateChange(IDeviceStateSource const&, SDKTemp
 fire_and_forget MainPage::OnPlotDataReady(IPlotDataSource const&, SDKTemplate::PlotDataReadyEventArgs e)
 {
     //auto lifetime = get_strong();
+    auto lifetime = this;
 
     //co_await resume_foreground(Dispatcher());
 
@@ -410,7 +412,9 @@ void MainPage::InitializeCapture()
 
     // Register for events
     //m_deviceStateChangeToken = m_capture->DeviceStateChanged({ get_weak(), &MainPage::OnDeviceStateChange });
+    //m_deviceStateChangeToken = m_capture->DeviceStateChanged({ Platform::WeakReference(), &MainPage::OnDeviceStateChange});
     //m_plotDataReadyToken = m_capture->PlotDataReady({ get_weak(), &MainPage::OnPlotDataReady });
+    //m_plotDataReadyToken = m_capture->PlotDataReady({ Platform::WeakReference(), &MainPage::OnPlotDataReady });
 
     // There is an initial discontinuity when we start, so reset discontinuity counter
     // to -1 so that we ignore that initial discontinuity.
