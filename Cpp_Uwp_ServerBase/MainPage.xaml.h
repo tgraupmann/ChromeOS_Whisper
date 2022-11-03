@@ -37,6 +37,8 @@ namespace Cpp_Uwp_ServerBase
 		void Page_Unloaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void cboAudioDevices_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
+		void StartCapture();
+
 		void Translate();
 
 		HRESULT GetDeviceId(IMMDevice* device, LPWSTR* _deviceId);
@@ -59,5 +61,9 @@ namespace Cpp_Uwp_ServerBase
 		// Handlers
 		winrt::fire_and_forget OnDeviceStateChange(winrt::SDKTemplate::IDeviceStateSource const& sender, winrt::SDKTemplate::DeviceStateChangedEventArgs e);
 		winrt::fire_and_forget OnPlotDataReady(winrt::SDKTemplate::IPlotDataSource const& sender, winrt::SDKTemplate::PlotDataReadyEventArgs e);
+
+		void InitializeCapture();
+		void StopCapture();
+		void ClearCapture();
 	};
 }
