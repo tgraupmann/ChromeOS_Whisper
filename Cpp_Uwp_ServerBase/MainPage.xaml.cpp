@@ -198,6 +198,10 @@ void Cpp_Uwp_ServerBase::MainPage::cboAudioDevices_SelectionChanged(Platform::Ob
     {
         return;
     }
+
+    StopCapture();
+    ClearCapture();
+    StartCapture();
 }
 
 
