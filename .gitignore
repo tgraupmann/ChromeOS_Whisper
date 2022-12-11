@@ -7,3 +7,5 @@ bin
 Generated Files
 x64
 packages
+Debug
+Release

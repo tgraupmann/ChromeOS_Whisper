@@ -31,6 +31,11 @@ namespace winrt::SDKTemplate
         m_SampleReadyCallback.SetQueueID(m_queueId.get());
     }
 
+    void WASAPICapture::AllowSaveToDisk(bool allowSaveToDisk)
+    {
+        m_allowSaveToDisk = allowSaveToDisk;
+    }
+
     //
     //  InitializeAudioDeviceAsync()
     //
@@ -188,42 +193,45 @@ namespace winrt::SDKTemplate
     {
         auto lifetime = get_strong();
 
-        // Create the WAV file, appending a number if file already exists
-        StorageFile file = co_await KnownFolders::MusicLibrary().CreateFileAsync(AUDIO_FILE_NAME, CreationCollisionOption::GenerateUniqueName);
+        if (m_allowSaveToDisk)
+        {
+            // Create the WAV file, appending a number if file already exists
+            StorageFile file = co_await KnownFolders::MusicLibrary().CreateFileAsync(AUDIO_FILE_NAME, CreationCollisionOption::GenerateUniqueName);
 
-        // Then create a RandomAccessStream
-        IRandomAccessStream stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
+            // Then create a RandomAccessStream
+            IRandomAccessStream stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
 
-        // Get the OutputStream for the file
-        m_contentStream = stream;
-        m_outputStream = stream.GetOutputStreamAt(0);
+            // Get the OutputStream for the file
+            m_contentStream = stream;
+            m_outputStream = stream.GetOutputStreamAt(0);
 
-        // Create the DataWriter
-        m_dataWriter = DataWriter(m_outputStream);
+            // Create the DataWriter
+            m_dataWriter = DataWriter(m_outputStream);
 
-        // Create the WAV header
-        DWORD formatSize = sizeof(WAVEFORMATEX) + m_mixFormat->cbSize; // Size of fmt chunk
-        DWORD header[] = {
-            FCC('RIFF'),        // RIFF header
-            0,                  // Total size of WAV (will be filled in later)
-            FCC('WAVE'),        // WAVE FourCC
-            FCC('fmt '),        // Start of 'fmt ' chunk
-            formatSize          // Size of fmt chunk
-        };
+            // Create the WAV header
+            DWORD formatSize = sizeof(WAVEFORMATEX) + m_mixFormat->cbSize; // Size of fmt chunk
+            DWORD header[] = {
+                FCC('RIFF'),        // RIFF header
+                0,                  // Total size of WAV (will be filled in later)
+                FCC('WAVE'),        // WAVE FourCC
+                FCC('fmt '),        // Start of 'fmt ' chunk
+                formatSize          // Size of fmt chunk
+            };
 
-        DWORD data[] = { FCC('data'), 0 };  // Start of 'data' chunk (total size will be filled in later)
+            DWORD data[] = { FCC('data'), 0 };  // Start of 'data' chunk (total size will be filled in later)
 
-        // Write the header
-        m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(header), sizeof(header) });
-        m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(m_mixFormat.get()), formatSize });
-        m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(data), sizeof(data) });
+            // Write the header
+            m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(header), sizeof(header) });
+            m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(m_mixFormat.get()), formatSize });
+            m_dataWriter.WriteBytes({ reinterpret_cast<uint8_t*>(data), sizeof(data) });
 
-        m_headerSize = co_await m_dataWriter.StoreAsync();
-        m_dataSize = 0;
-        m_bytesSinceLastFlush = 0;
+            m_headerSize = co_await m_dataWriter.StoreAsync();
+            m_dataSize = 0;
+            m_bytesSinceLastFlush = 0;
 
-        // Wait for file data to be written to file
-        co_await m_dataWriter.FlushAsync();
+            // Wait for file data to be written to file
+            co_await m_dataWriter.FlushAsync();
+        }
 
         SetState(DeviceState::Initialized);
     }
@@ -241,25 +249,28 @@ namespace winrt::SDKTemplate
     {
         auto lifetime = get_strong();
 
-        // Prepare a buffer to write DWORDs into the stream header.
-        Buffer dwordBuffer(sizeof(DWORD));
-        dwordBuffer.Length(sizeof(DWORD));
-        auto dwordBufferPtr = reinterpret_cast<DWORD*>(dwordBuffer.data());
+        if (m_allowSaveToDisk)
+        {
+            // Prepare a buffer to write DWORDs into the stream header.
+            Buffer dwordBuffer(sizeof(DWORD));
+            dwordBuffer.Length(sizeof(DWORD));
+            auto dwordBufferPtr = reinterpret_cast<DWORD*>(dwordBuffer.data());
 
-        IRandomAccessStream stream = m_contentStream.CloneStream();
+            IRandomAccessStream stream = m_contentStream.CloneStream();
 
-        // Write the size of the 'data' chunk first
-        stream.Seek(m_headerSize - sizeof(DWORD));
-        *dwordBufferPtr = m_dataSize;
-        co_await stream.WriteAsync(dwordBuffer);
+            // Write the size of the 'data' chunk first
+            stream.Seek(m_headerSize - sizeof(DWORD));
+            *dwordBufferPtr = m_dataSize;
+            co_await stream.WriteAsync(dwordBuffer);
 
-        // Write the total file size, minus RIFF chunk and size
-        stream.Seek(sizeof(DWORD)); // sizeof(DWORD) == sizeof(FOURCC)
-        *dwordBufferPtr = m_dataSize + m_headerSize - 8; // 8 = RIFF chunk and size
-        co_await stream.WriteAsync(dwordBuffer);
+            // Write the total file size, minus RIFF chunk and size
+            stream.Seek(sizeof(DWORD)); // sizeof(DWORD) == sizeof(FOURCC)
+            *dwordBufferPtr = m_dataSize + m_headerSize - 8; // 8 = RIFF chunk and size
+            co_await stream.WriteAsync(dwordBuffer);
 
-        co_await stream.FlushAsync();
-        stream.Close();
+            co_await stream.FlushAsync();
+            stream.Close();
+        }
 
         SetState(DeviceState::Stopped);
     }
@@ -381,7 +392,10 @@ namespace winrt::SDKTemplate
     {
         auto lifetime = get_strong();
 
-        co_await m_dataWriter.StoreAsync();
+        if (m_allowSaveToDisk)
+        {
+            co_await m_dataWriter.StoreAsync();
+        }
         m_writing = false;
 
         if (m_deviceState == DeviceState::Stopping)
@@ -512,8 +526,11 @@ namespace winrt::SDKTemplate
                 array_view<uint8_t> dataBytes{ data, bytesToCapture };
                 ProcessScopeData(dataBytes);
 
-                // Write File and async store
-                m_dataWriter.WriteBytes(dataBytes);
+                if (m_allowSaveToDisk)
+                {
+                    // Write File and async store
+                    m_dataWriter.WriteBytes(dataBytes);
+                }
 
                 // End of scope: Buffer is released back, and GetBuffer variables are no longer valid
             }

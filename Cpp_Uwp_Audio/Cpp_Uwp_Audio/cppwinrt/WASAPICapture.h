@@ -23,6 +23,8 @@ namespace winrt::SDKTemplate
     public:
         WASAPICapture();
 
+        void AllowSaveToDisk(bool allowSaveToDisk);
+
         void SetLowLatencyCapture(bool value) { m_isLowLatency = value; }
         void AsyncInitializeAudioDevice() noexcept;
         void AsyncStartCapture();
@@ -64,6 +66,7 @@ namespace winrt::SDKTemplate
         uint32_t m_headerSize = 0;
         uint32_t m_dataSize = 0;
         uint32_t m_bytesSinceLastFlush = 0;
+        bool m_allowSaveToDisk = false;
         bool m_writing = false;
         bool m_isLowLatency = false;
 

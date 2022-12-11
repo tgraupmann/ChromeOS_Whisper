@@ -228,6 +228,8 @@ namespace winrt::SDKTemplate::implementation
         // Create a new WASAPI capture instance
         m_capture = make_self<WASAPICapture>();
 
+        m_capture->AllowSaveToDisk(false);
+
         // Register for events
         m_deviceStateChangeToken = m_capture->DeviceStateChanged({ get_weak(), &Scenario5::OnDeviceStateChange });
         m_plotDataReadyToken = m_capture->PlotDataReady({ get_weak(), &Scenario5::OnPlotDataReady });
