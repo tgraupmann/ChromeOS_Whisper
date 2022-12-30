@@ -30,7 +30,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Width="500" Margin="0,0,150,0" Style="{StaticResource BasicTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap">
-                    This scenario demonstrates how to activate the default audio capture interface and use WASAPI to capture PCM audio. The user has the option to minimize capture latency by minimizing the size of the capture buffer.  A file named WASAPIAudioCapture.wav, appended with a number if the file already exists, will be written to the music library.
+                    This scenario demonstrates how to activate the default audio capture interface and use WASAPI to capture PCM audio. The user has the option to minimize capture latency by minimizing the size of the capture buffer.
             </TextBlock>
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5,5,0,0">
                 <Border BorderBrush="Black" BorderThickness="2" RenderTransformOrigin="0.505,0.72">
