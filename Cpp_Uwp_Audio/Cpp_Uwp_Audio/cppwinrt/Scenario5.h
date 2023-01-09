@@ -21,6 +21,8 @@ namespace winrt::SDKTemplate::implementation
 
         void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs const&);
 
+        fire_and_forget Enumerate_Click(IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& e);
+
         void btnStartCapture_Click(IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& e);
         void btnStopCapture_Click(IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& e);
 

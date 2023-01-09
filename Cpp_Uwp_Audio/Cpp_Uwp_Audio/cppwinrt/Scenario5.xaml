@@ -22,6 +22,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid x:Name="Input" Grid.Row="0">
             <Grid.RowDefinitions>
@@ -67,6 +68,11 @@
             </Grid.RowDefinitions>
             <Polyline x:Name="Oscilloscope" Stroke="#FF0000" StrokeThickness="1" Points="100,100,700,100"/>
         </Grid>
+
+        <StackPanel Orientation="Vertical" Margin="0,10,0,0" Grid.Row="2">
+            <Button x:Name="Enumerate" Content="Enumerate Devices" Margin="0,0,10,0" Click="Enumerate_Click"/>
+            <ListBox x:Name="DevicesList" HorizontalAlignment="Left" Height="470" VerticalAlignment="Top" Width="630"/>
+        </StackPanel>        
 
         <!-- Add Storyboards to the visual states below as necessary for supporting the various layouts -->
         <VisualStateManager.VisualStateGroups>

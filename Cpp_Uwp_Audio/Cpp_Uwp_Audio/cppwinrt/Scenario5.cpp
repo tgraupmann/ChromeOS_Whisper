@@ -12,7 +12,9 @@
 #include "Scenario5.h"
 #include "Scenario5.g.cpp"
 
+using namespace winrt::Windows::Devices::Enumeration;
 using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Media::Devices;
 using namespace winrt::Windows::Storage::Streams;
 using namespace winrt::Windows::UI::Xaml;
 using namespace winrt::Windows::UI::Xaml::Navigation;
@@ -27,6 +29,9 @@ namespace winrt::SDKTemplate::implementation
     Scenario5::Scenario5()
     {
         InitializeComponent();
+
+        // enumerate devices on window load
+        Enumerate_Click(nullptr, nullptr);
     }
 
     void Scenario5::OnNavigatedFrom(NavigationEventArgs const&)
@@ -81,6 +86,48 @@ namespace winrt::SDKTemplate::implementation
 #pragma endregion
 
 #pragma region UI Event Handlers
+
+    fire_and_forget Scenario5::Enumerate_Click(IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&)
+    {
+        auto lifetime = get_strong();
+
+        DevicesList().Items().Clear();
+
+        // Get the string identifier of the audio renderer
+        hstring AudioSelector = MediaDevice::GetAudioRenderSelector();
+
+        // Custom properties defined in mmdeviceapi.h in the format "{GUID} PID"
+        constexpr wchar_t PKEY_AudioEndpoint_Supports_EventDriven_Mode[] = L"{1da5d803-d492-4edd-8c23-e0c0ffee7f0e} 7";
+
+        // Add custom properties to the query
+        DeviceInformationCollection deviceInfoCollection = co_await DeviceInformation::FindAllAsync(AudioSelector, { PKEY_AudioEndpoint_Supports_EventDriven_Mode });
+        try
+        {
+            // Get a string representing the Default Audio Capture Device
+            DevicesList().Items().Append(box_value(L"Default Audio Device"));
+
+            // Enumerate through the devices and the custom properties
+            for (DeviceInformation&& deviceInfo : deviceInfoCollection)
+            {
+                hstring deviceInfoString = deviceInfo.Name();
+
+                // Pull out the custom property
+                std::optional<uint32_t> supportsEventDriven = deviceInfo.Properties().TryLookup(PKEY_AudioEndpoint_Supports_EventDriven_Mode).try_as<uint32_t>();
+                if (supportsEventDriven)
+                {
+                    deviceInfoString = deviceInfoString + L" --> EventDriven(" + to_hstring(supportsEventDriven.value()) + L")";
+                }
+
+                DevicesList().Items().Append(box_value(deviceInfoString));
+            }
+            rootPage.NotifyUser(L"Enumerated " + to_hstring(deviceInfoCollection.Size()) + L" device(s).", NotifyType::StatusMessage);
+        }
+        catch (...)
+        {
+            rootPage.NotifyUser(to_message(), NotifyType::ErrorMessage);
+        }
+    }
+
     void Scenario5::btnStartCapture_Click(IInspectable const&, RoutedEventArgs const&)
     {
         rootPage.NotifyUser(L"", NotifyType::StatusMessage);
@@ -242,8 +289,11 @@ namespace winrt::SDKTemplate::implementation
         m_isLowLatency = toggleMinimumLatency().IsOn();
         m_capture->SetLowLatencyCapture(m_isLowLatency);
 
+        // Get a string representing the Default Audio Capture Device
+        hstring deviceIdString = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Default);
+
         // Perform the initialization
-        m_capture->AsyncInitializeAudioDevice();
+        m_capture->AsyncInitializeAudioDevice(deviceIdString);
     }
 
     //

@@ -27,6 +27,7 @@ namespace winrt::SDKTemplate
 
         void SetLowLatencyCapture(bool value) { m_isLowLatency = value; }
         void AsyncInitializeAudioDevice() noexcept;
+        void AsyncInitializeAudioDevice(const winrt::hstring& deviceIdString) noexcept;
         void AsyncStartCapture();
         void AsyncStopCapture();
 

@@ -59,6 +59,25 @@ namespace winrt::SDKTemplate
     }
 
     //
+    //  InitializeAudioDeviceAsync()
+    //
+    //  Activates the default audio capture on a asynchronous callback thread.  This needs
+    //  to be called from the main UI thread.
+    //
+    void WASAPICapture::AsyncInitializeAudioDevice(const hstring& deviceIdString) noexcept try
+    {
+        com_ptr<IActivateAudioInterfaceAsyncOperation> asyncOp;
+
+        // This call must be made on the main UI thread.  Async operation will call back to 
+        // IActivateAudioInterfaceCompletionHandler::ActivateCompleted, which must be an agile interface implementation
+        check_hresult(ActivateAudioInterfaceAsync(deviceIdString.c_str(), __uuidof(IAudioClient3), nullptr, this, asyncOp.put()));
+    }
+    catch (...)
+    {
+        SetState(DeviceState::Error, to_hresult());
+    }
+
+    //
     //  ActivateCompleted()
     //
     //  Callback implementation of ActivateAudioInterfaceAsync function.  This will be called on MTA thread
