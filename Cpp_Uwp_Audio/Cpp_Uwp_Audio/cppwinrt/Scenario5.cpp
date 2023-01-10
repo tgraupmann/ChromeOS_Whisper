@@ -91,6 +91,8 @@ namespace winrt::SDKTemplate::implementation
     {
         auto lifetime = get_strong();
 
+        m_DeviceIds.clear();
+
         DevicesList().Items().Clear();
 
         // Get the string identifier of the audio renderer
@@ -106,10 +108,16 @@ namespace winrt::SDKTemplate::implementation
             // Get a string representing the Default Audio Capture Device
             DevicesList().Items().Append(box_value(L"Default Audio Device"));
 
+            hstring defaultIdString = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Default);
+            m_DeviceIds.push_back(defaultIdString);
+
             // Enumerate through the devices and the custom properties
             for (DeviceInformation&& deviceInfo : deviceInfoCollection)
             {
                 hstring deviceInfoString = deviceInfo.Name();
+                hstring deviceIdString = deviceInfo.Id();
+
+                m_DeviceIds.push_back(deviceIdString);
 
                 // Pull out the custom property
                 std::optional<uint32_t> supportsEventDriven = deviceInfo.Properties().TryLookup(PKEY_AudioEndpoint_Supports_EventDriven_Mode).try_as<uint32_t>();
@@ -119,6 +127,11 @@ namespace winrt::SDKTemplate::implementation
                 }
 
                 DevicesList().Items().Append(box_value(deviceInfoString));
+
+                if (DevicesList().SelectedIndex() < 0)
+                {
+                    DevicesList().SelectedIndex(0);
+                }
             }
             rootPage.NotifyUser(L"Enumerated " + to_hstring(deviceInfoCollection.Size()) + L" device(s).", NotifyType::StatusMessage);
         }
@@ -292,6 +305,10 @@ namespace winrt::SDKTemplate::implementation
         // Get a string representing the Default Audio Capture Device
         hstring deviceIdString = MediaDevice::GetDefaultAudioCaptureId(AudioDeviceRole::Default);
 
+        if (DevicesList().SelectedIndex() >= 0)
+        {
+            deviceIdString = m_DeviceIds[DevicesList().SelectedIndex()];
+        }
         // Perform the initialization
         m_capture->AsyncInitializeAudioDevice(deviceIdString);
     }

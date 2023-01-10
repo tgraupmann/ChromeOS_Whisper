@@ -45,6 +45,8 @@ namespace winrt::SDKTemplate::implementation
         void InitializeCapture();
         void StopCapture();
         void ClearCapture();
+
+        std::vector<winrt::hstring> m_DeviceIds;
     };
 }
 
