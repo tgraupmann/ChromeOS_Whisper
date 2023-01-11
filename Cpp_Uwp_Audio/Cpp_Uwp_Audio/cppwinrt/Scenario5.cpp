@@ -95,8 +95,8 @@ namespace winrt::SDKTemplate::implementation
 
         DevicesList().Items().Clear();
 
-        // Get the string identifier of the audio renderer
-        hstring AudioSelector = MediaDevice::GetAudioRenderSelector();
+        // Get the string identifier of the audio capturer
+        hstring AudioSelector = MediaDevice::GetAudioCaptureSelector();
 
         // Custom properties defined in mmdeviceapi.h in the format "{GUID} PID"
         constexpr wchar_t PKEY_AudioEndpoint_Supports_EventDriven_Mode[] = L"{1da5d803-d492-4edd-8c23-e0c0ffee7f0e} 7";
